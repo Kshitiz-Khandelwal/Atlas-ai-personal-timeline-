@@ -116,6 +116,7 @@ impl EmbeddingsEngine {
         &self,
         vault: &VaultManager,
         node_id: &str,
+        title: &str,
         embedding: &[f32],
     ) -> Result<()> {
         let pool_guard = vault.get_pool().await?;
@@ -125,6 +126,12 @@ impl EmbeddingsEngine {
             .iter()
             .flat_map(|f| f.to_le_bytes())
             .collect();
+
+        // Ensure parent node exists to satisfy FOREIGN KEY (node_id) REFERENCES nodes(id)
+        conn.execute(
+            "INSERT OR IGNORE INTO nodes (id, label, title, source_type) VALUES (?, 'memory', ?, 'user_entry')",
+            [node_id, title],
+        )?;
 
         conn.execute(
             "INSERT OR REPLACE INTO embeddings_metadata (node_id, model_name, dimensions) VALUES (?, 'bge-small-en-v1.5', 384)",
@@ -156,20 +163,20 @@ impl EmbeddingsEngine {
 
         let mut stmt = conn.prepare(
             r#"
-            SELECT node_id, distance
-            FROM node_embeddings
-            WHERE embedding MATCH ?
-            ORDER BY distance
+            SELECT n.title, ne.distance
+            FROM node_embeddings ne
+            LEFT JOIN nodes n ON n.id = ne.node_id
+            WHERE ne.embedding MATCH ?
+            ORDER BY ne.distance
             LIMIT ?
             "#,
         )?;
 
         let rows = stmt.query_map(rusqlite::params![query_bytes, top_k as i64], |row| {
-            let node_id: String = row.get(0)?;
+            let title: Option<String> = row.get(0)?;
             let distance: f32 = row.get(1)?;
-            // Convert L2/cosine distance to similarity score
             let similarity = 1.0 - distance;
-            Ok((node_id, similarity))
+            Ok((title.unwrap_or_else(|| "Unknown Node".to_string()), similarity))
         })?;
 
         let mut results = Vec::new();

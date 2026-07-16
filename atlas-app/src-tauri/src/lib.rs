@@ -89,7 +89,7 @@ async fn embed_and_store(
         let _ = embed_engine.load_model().await?;
     }
     let vector = embed_engine.embed_text(&text).await?;
-    embed_engine.insert_embedding(&vault, &node_id, &vector).await?;
+    embed_engine.insert_embedding(&vault, &node_id, &text, &vector).await?;
     Ok(vector)
 }
 
