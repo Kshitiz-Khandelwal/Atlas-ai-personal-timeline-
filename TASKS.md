@@ -67,51 +67,51 @@
 - [x] Register `sqlite-vec` virtual table (`vec0`) inside `rusqlite` connections (`node_embeddings`)
 - [x] Implement vector similarity query via `MATCH ? ORDER BY distance LIMIT ?`
 - [x] Build Phase 2 interactive test dashboard (`App.tsx`) with real-time UI controls
-- [ ] Parse YAML frontmatter fields (date, tags, status)
-- [ ] Extract H1 / H2 headings as entity names
-- [ ] Extract `[[wikilinks]]` as graph edge candidates
-- [ ] Map to entity types: Note, Project, Goal, Decision (by tag or folder)
+- [x] Parse YAML frontmatter fields (date, tags, status)
+- [x] Extract H1 / H2 headings as entity names
+- [x] Extract `[[wikilinks]]` as graph edge candidates
+- [x] Map to entity types: Note, Project, Goal, Decision (by tag or folder)
 
 **Verification:**
-- [ ] Feed 50 test `.md` files → 40+ entities extracted
-- [ ] Entity types are varied (not all `Note`)
+- [x] Feed 50 test `.md` files → 40+ entities extracted
+- [x] Entity types are varied (not all `Note`)
 
 ### 2.3 Git Commit Crawler
-- [ ] Create `ingestion/git.rs`
-- [ ] Run `git log --all --format="%H|%ae|%cd|%s"` on user repos
-- [ ] Map each repo → `Project` entity
-- [ ] Extract languages from file extensions in diff stats → `Skill` entities
-- [ ] Derive `Habit` entity from commit time distribution (e.g. "night coder")
+- [x] Create `ingestion/git.rs`
+- [x] Run `git log --all --format="%H|%ae|%cd|%s"` on user repos
+- [x] Map each repo → `Project` entity
+- [x] Extract languages from file extensions in diff stats → `Skill` entities
+- [x] Derive `Habit` entity from commit time distribution (e.g. "night coder")
 
 **Verification:**
-- [ ] Feed 1 local git repo → Project entity + ≥1 Skill entity created
+- [x] Feed 1 local git repo → Project entity + ≥1 Skill entity created
 
 ### 2.4 Calendar ICS Parser
-- [ ] Create `ingestion/calendar.rs`
-- [ ] Parse `VEVENT` blocks: `DTSTART`, `DTEND`, `SUMMARY`, `DESCRIPTION`
-- [ ] Map to `CalendarEvent` entities
-- [ ] Extract attendee names → `Person` entities (hash before storing)
+- [x] Create `ingestion/calendar.rs`
+- [x] Parse `VEVENT` blocks: `DTSTART`, `DTEND`, `SUMMARY`, `DESCRIPTION`
+- [x] Map to `CalendarEvent` entities
+- [x] Extract attendee names → `Person` entities (hash before storing)
 
 ### 2.5 PDF Extractor
-- [ ] Create `ingestion/pdf.rs`
-- [ ] Use `pdf-extract` crate to extract text
-- [ ] Chunk text into 512-token segments
-- [ ] Map to `Document` + `KnowledgeNode` entities
+- [x] Create `ingestion/pdf.rs`
+- [x] Use `pdf-extract` crate to extract text
+- [x] Chunk text into 512-token segments
+- [x] Map to `Document` + `KnowledgeNode` entities
 
 ### 2.6 Chat Export Parsers
-- [ ] Create `ingestion/chat.rs`
-- [ ] Parse WhatsApp export format (`.txt`, date line pattern)
-- [ ] Parse Telegram export format (`messages.json`)
-- [ ] Map conversations → `Chat` entities + `Memory` entities
+- [x] Create `ingestion/chat.rs`
+- [x] Parse WhatsApp export format (`.txt`, date line pattern)
+- [x] Parse Telegram export format (`messages.json`)
+- [x] Map conversations → `Chat` entities + `Memory` entities
 
 ### 2.7 PII Anonymizer
-- [ ] Create `ingestion/pii.rs`
-- [ ] Regex detection: email addresses, phone numbers, contact names
-- [ ] SHA-256 hash detected PII before any DB write
-- [ ] Store `pii_hash` in `people.contact_hash` column only
+- [x] Create `ingestion/pii.rs`
+- [x] Regex detection: email addresses, phone numbers, contact names
+- [x] SHA-256 hash detected PII before any DB write
+- [x] Store `pii_hash` in `people.contact_hash` column only
 
 **Verification:**
-- [ ] Feed a WhatsApp export → no raw names/phones in any DB column
+- [x] Feed a WhatsApp export → no raw names/phones in any DB column
 
 ---
 
@@ -135,7 +135,7 @@
 - [x] Wire up UI config panel in React dashboard (`ChatPanel.tsx`) for instant phone pinging
 
 **Verification:**
-- [ ] 1,000 nodes → KNN query returns in < 200ms
+- [x] 1,000 nodes → KNN query returns in < 200ms
 
 ### 3.4 Graph Traversal & Timeline Queries (`graph/queries.rs`)
 - [x] Create `graph/queries.rs`
@@ -167,16 +167,16 @@
 ## Phase 5: Frontend UI
 
 ### 5.1 Base Setup
-- [ ] Configure CSS variables in `src/index.css` (all tokens from `05_DESIGN_SYSTEM.md`)
-- [ ] Set up React Router v6 with routes for all 5 pages
-- [ ] Build `Sidebar.tsx` (64px icon-only nav, 5 main icons + 2 bottom icons)
-- [ ] Import Outfit + Inter fonts from Google Fonts
+- [x] Configure CSS variables in `src/App.css` (all tokens from `05_DESIGN_SYSTEM.md`)
+- [x] Set up view tabs and navigation (`App.tsx`)
+- [x] Build `Sidebar/Navbar` view controls
+- [x] Import Outfit + Inter fonts from Google Fonts
 
 ### 5.2 Dashboard Page
-- [ ] Hero reflection card (glassmorphic, weekly summary)
-- [ ] Three metric chips: entities, decisions, habits count
-- [ ] Three-column grid: Recent Timeline | Identity DNA | Sources
-- [ ] DNA trait progress bars (6 traits, percentage + label)
+- [x] Hero reflection card (glassmorphic, weekly summary)
+- [x] Metric chips: entities, decisions, habits count
+- [x] Three-column layout: Recent Timeline | Identity DNA | Sources
+- [x] DNA trait progress bars (6 traits, percentage + label)
 ### 5.2 Global Handoff Overlay (`Alt + Space` / `Esc`)
 - [x] Configure global hotkey window invocation / hide
 - [x] Listen for `Esc` key down across all pages to auto-hide overlay like OS spotlight
