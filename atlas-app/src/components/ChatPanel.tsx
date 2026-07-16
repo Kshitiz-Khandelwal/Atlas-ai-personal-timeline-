@@ -78,7 +78,7 @@ export const ChatPanel: React.FC = () => {
       await invoke('embed_and_store', { nodeId, text: userMsg });
 
       // 2. Query top nearest memories from identity graph
-      const topMatches: Array<[string, number]> = await invoke('search_graph_vector', { queryText: userMsg, topK: 3 });
+      const topMatches: Array<[string, number]> = await invoke('search_graph_vector', { query: userMsg, topK: 3 });
 
       // 3. Generate Mirror Persona response (simulated local or Ollama response with sassy/candid flair)
       setTimeout(() => {
