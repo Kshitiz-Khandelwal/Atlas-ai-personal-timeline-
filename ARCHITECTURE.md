@@ -97,7 +97,7 @@ User's Local Files (notes, git, calendar, PDF, chat exports)
 
 | Module Path | Responsibility |
 |:---|:---|
-| `src-tauri/src/main.rs` | Tauri app bootstrap, IPC command registration |
+| `src-tauri/src/main.rs` | Tauri app bootstrap, IPC commands, Tray menu setup, Global Hotkey listener |
 | `src-tauri/src/vault.rs` | Vault init, SQLCipher connection, key derivation (Argon2id) |
 | `src-tauri/src/ingestion/mod.rs` | Ingestion pipeline orchestrator |
 | `src-tauri/src/ingestion/markdown.rs` | Markdown + Obsidian parser |
@@ -105,12 +105,13 @@ User's Local Files (notes, git, calendar, PDF, chat exports)
 | `src-tauri/src/ingestion/calendar.rs` | ICS event parser |
 | `src-tauri/src/ingestion/pdf.rs` | PDF text extractor |
 | `src-tauri/src/ingestion/chat.rs` | WhatsApp + Telegram chat parser |
+| `src-tauri/src/ingestion/audio.rs` | Audio recorder engine (local WAV) + local Whisper ONNX transcriber |
 | `src-tauri/src/ingestion/pii.rs` | SHA-256 PII hashing module |
 | `src-tauri/src/graph/mod.rs` | Graph traversal queries |
 | `src-tauri/src/graph/schema.rs` | SQL schema init (CREATE TABLE statements) |
 | `src-tauri/src/embeddings.rs` | ONNX runtime loader + embedding computation |
 | `src-tauri/src/retrieval.rs` | Hybrid scorer, context packer, temporal filter |
-| `src-tauri/src/ai.rs` | Ollama REST client, streaming handler |
+| `src-tauri/src/ai.rs` | Ollama REST client, streaming handler, Mirror Persona style prompt builder |
 | `src-tauri/src/reflection.rs` | Weekly reflection job, Identity DNA updater |
 
 ---
@@ -119,7 +120,7 @@ User's Local Files (notes, git, calendar, PDF, chat exports)
 
 | Component / Page | Route | Responsibility |
 |:---|:---|:---|
-| `App.tsx` | `/` | Root router, sidebar layout, theme provider |
+| `App.tsx` | `/` | Root router, sidebar layout, theme provider, global event listener for hotkeys |
 | `pages/Dashboard.tsx` | `/dashboard` | Weekly reflection card, DNA bars, source status |
 | `pages/Timeline.tsx` | `/timeline` | Chronological event feed, date filters |
 | `pages/Graph.tsx` | `/graph` | Force-directed node canvas (d3 or react-force-graph) |
@@ -129,6 +130,8 @@ User's Local Files (notes, git, calendar, PDF, chat exports)
 | `components/CitationCard.tsx` | — | Source file citation overlay in chat |
 | `components/EntityCard.tsx` | — | Reusable entity display card (timeline + graph) |
 | `components/DNABar.tsx` | — | Single trait progress bar with percentage |
+| `components/Avatar.tsx` | — | Interactive animated SVG anime avatar (dynamic expressions, mouth-sync, blink, idle) |
+| `components/AudioRecorder.tsx` | — | Audio input recording overlay with waveform visualizer |
 
 ---
 
@@ -146,6 +149,8 @@ User's Local Files (notes, git, calendar, PDF, chat exports)
 | Memory Safety | `secrecy` crate (zeroizing sensitive values) | — |
 | Filesystem Watch | `notify` crate | 6.x |
 | PDF Parsing | `pdf-extract` crate | latest |
+| Audio Recording | `cpal` crate | latest |
+| Local Transcription | Whisper ONNX (`ort` crate) or `whisper-rs` | — |
 | Embedding Model | `bge-small-en-v1.5` (ONNX format, 384-dim) | — |
 | ONNX Runtime | `ort` crate | 1.x |
 | Vector Search | `sqlite-vec` extension | latest |

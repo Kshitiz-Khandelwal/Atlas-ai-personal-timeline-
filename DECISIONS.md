@@ -123,26 +123,34 @@
 
 ---
 
-## D-009: Past-Persona via SQL Cutoff Filter
-
-**Decision:** Implement the "Past-Persona" time-travel feature by appending `WHERE created_at <= :cutoff` to ALL SQL queries used by the retrieval engine during a past-persona session.
-
+## D-009: Local Whisper for Voice Transcription
+**Decision:** Use a lightweight local ONNX Whisper model (via `ort` crate) or `whisper-rs` (binding to `whisper.cpp`) to transcribe recorded WAV audio.
 **Rationale:**
-- Simple, reliable, and impossible to circumvent. The LLM cannot "see" future events because they are filtered at the database query layer, not at the prompt layer.
-- Prompt-layer filtering ("ignore events after 2024") is unreliable — LLMs can hallucinate around prompt instructions.
-- The SQL filter is enforced in Rust before any data reaches the LLM context.
+- Maintains absolute offline privacy for personal voice diaries.
+- Whisper Small/Base ONNX models run in sub-second times for typical 30-second diary entries on modern CPUs.
+- Avoids external API costs and key management.
+
+**Rejected:** Google Cloud Speech-to-Text / OpenAI Whisper API (both violate the local-only constraint).
 
 ---
 
-## D-010: Hybrid Retrieval Scoring
-
-**Decision:** Rank retrieval candidates using a weighted hybrid of vector similarity, graph centrality, and temporal decay:
-$$Score = 0.5 \cdot \text{VectorScore} + 0.3 \cdot \text{GraphScore} - 0.2 \cdot \Delta t$$
-
+## D-010: SVG Path Morphing and CSS Animations for the Animated Anime Avatar
+**Decision:** Implement the animated anime avatar using inline SVG nodes in React, morphing paths with CSS transitions or simple web-animation APIs, driven by sentiment-expression parameters from the LLM.
 **Rationale:**
-- Pure vector search misses strongly related nodes that have slightly different wording.
-- Pure graph traversal misses semantically similar but graph-disconnected nodes.
-- Temporal decay ensures recent context ranks higher for current-state queries (overridden for historical queries by the past-persona filter).
-- Retrieval cutoff at `Score ≥ 0.65` prevents low-quality hallucination-bait from entering the LLM context.
+- Keeps the application lightweight. Heavy 3D rendering engines (Three.js, Unity, or Live2D Web SDK) introduce massive package bloat (>5MB JS bundle size) and high GPU/memory overhead.
+- SVG paths can be easily modified programmatically to handle blinking, mouth movements (lip-syncing), and custom expressions (smile, smirk, sad, confused) with very clean visual styling matching the dark-mode aesthetic.
+- Zero external assets or proprietary binaries required.
 
-**Weights are configurable** and may be tuned after empirical testing.
+**Rejected:** Live2D Cubism SDK (heavy, complex licensing), Three.js 3D models (too heavy for a simple popup app).
+
+---
+
+## D-011: Global Shortcut and Tray Window Behavior
+**Decision:** Configure the Tauri app as a tray-only or tray-primary helper application. Use `global-shortcut` or Tauri's native tray window management to capture hotkeys and toggle visibility.
+**Rationale:**
+- Creates a seamless "Spotlight/Raycast-like" user experience.
+- Hides the dock/taskbar icon if desired, keeping the user's desktop workspace clean.
+- The window maintains a fixed width and is styled as a right-aligned sliding panel or center HUD popup.
+
+**Rejected:** Standard persistent desktop window (too bulky for quick reference and entry).
+

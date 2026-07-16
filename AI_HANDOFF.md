@@ -145,31 +145,49 @@ $$Score = 0.5 \cdot \text{VectorScore} + 0.3 \cdot \text{GraphScore} - 0.2 \cdot
 | Dashboard | `/dashboard` | Reflection hero card, DNA bars, source list, metric chips |
 | Timeline | `/timeline` | Activity heatmap, vertical event feed, category filters |
 | Identity Graph | `/graph` | Force-directed canvas, entity type filter panel, node detail slide-in |
-| AI Chat | `/chat` | Thread sidebar, chat area with citations, persona switcher |
-| Settings | `/settings` | Source management, passphrase, model selector, backup |
+| AI Chat | `/chat` | Thread sidebar, chat area with citations, persona switcher, animated SVG avatar, audio recorder |
+| Settings | `/settings` | Source management, passphrase, model selector, backup, mirror persona & tray togglers, scenario parser trigger |
 
 **Sidebar:** 64px icon-only. 5 nav icons (top) + 2 icons (bottom: Settings, Profile).
+**Desktop Layout:** Configured to support system tray startup and global hotkey `Alt + Space` popup toggle. Focus-loss automatically minimizes window to tray.
 
 ---
 
-## Section 10: What Is NOT Built Yet
+## Section 10: Expanded Dynamic Behaviors
+
+### 10.1 Local Voice Ingestion
+- Captured audio is routed to local `cpal` recorder, outputted as temporary WAV files.
+- Transcribed locally using Whisper ONNX (`ort` crate) or `whisper.cpp` bindings. Transcripts are cleaned and written to database.
+
+### 10.2 Mirror Persona (Authentic & Cursing Tone)
+- **Constraint:** AI style matches the user's vocabulary complexity, favorite slang, and patterns mined from chat history imports.
+- **Tone:** Allowed to express raw character traits including safe levels of cursing and informal remarks (configurable via settings) to avoid sanitized corporate chatbot behavior.
+
+### 10.3 SVG Animated Avatar
+- Inline SVG face render in UI driven by sentiment state tags injected by the backend (e.g. `<avatar:smirk>`).
+- Path morphs handle idle blink loops, mouth movement sync during token streaming, and expressions for confidence levels (Smile/Smirk/Sigh/Neutral).
+
+---
+
+## Section 11: What Is NOT Built Yet
 
 As of July 2026, no code has been written. The following are all planned but not yet implemented:
 
-- [ ] Tauri app scaffold
+- [ ] Tauri app scaffold & tray integration
 - [ ] SQLCipher database
-- [ ] Any ingestion parser
-- [ ] ONNX embedding pipeline
+- [ ] Any ingestion parser (Obsidian, Git, ICS, WhatsApp)
+- [ ] Audio capture & local Whisper transcriber
+- [ ] ONNX embedding pipeline (bge-small ONNX)
 - [ ] sqlite-vec integration
 - [ ] Ollama client
-- [ ] Any React component
+- [ ] Any React component (Dashboard, Timeline, Graph, Chat, Avatar SVG)
 - [ ] Any CSS
 
 **The UI design prototype exists** at: `c:\Users\Admin\Desktop\Kshitiz\Atlas\stich desing\atlas_ai_personal_intelligence_os.html`
 
 ---
 
-## Section 11: GitHub Repository
+## Section 12: GitHub Repository
 
 URL: `https://github.com/Kshitiz-Khandelwal/Atlas-ai-personal-timeline-`  
 Branch: `main`  
@@ -177,13 +195,15 @@ Branch: `main`
 
 ---
 
-## Section 12: What To Work On Next (Priority Order)
+## Section 13: What To Work On Next (Priority Order)
 
-1. **Tauri scaffold** — `npm create tauri-app` with React/TS template
+1. **Tauri scaffold & Tray setup** — `npm create tauri-app` with React/TS, set up window properties and hotkeys
 2. **SQLCipher setup** — vault.rs, Argon2id key derivation, schema init
 3. **Markdown parser** — first ingestion engine
 4. **Embedding pipeline** — bge-small ONNX via `ort` crate
 5. **sqlite-vec KNN** — vector search integration
-6. **Ollama client** — connect to local LLM
-7. **Hybrid retrieval** — scorer + context packer
-8. **React frontend** — all 5 pages from the Stitch design
+6. **Audio recording & Whisper transcriber** — local transcription logic
+7. **Ollama client** — connect to local LLM with mirror persona prompting rules
+8. **Hybrid retrieval** — scorer + context packer
+9. **React frontend & Dynamic SVG Avatar** — dashboard, timeline, graph, settings, chat interface with avatar animations
+

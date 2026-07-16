@@ -203,6 +203,11 @@
 - [ ] Persona switcher: Past / Present / Future mode
 - [ ] User messages: right-aligned dark blue pill
 - [ ] Atlas responses: left-aligned, plain text with [1][2] citation markers
+- [ ] Dynamic SVG Anime Avatar:
+  - [ ] Render responsive SVG inline character face component
+  - [ ] Implement animations: blink loop, idle breathing, and talking lip-sync
+  - [ ] Implement expressions: smirk (confidence), worry (sad/concerned), spark (curiosity) mapped to LLM sentiment
+- [ ] Audio recording button and audio visualization overlay
 - [ ] Confidence bar below each AI response
 - [ ] Input: floating pill shape with send button + model selector
 - [ ] Citation rail: expandable source cards with file path + date
@@ -210,6 +215,9 @@
 ### 5.5 Settings Page
 - [ ] Source directory management (add/remove watched folders)
 - [ ] Change master passphrase
+- [ ] Toggle "Mirror Persona Mode" (enables casual/candid tone & cursing)
+- [ ] Toggle "Hotkey Popup Mode" (configures tray-only, shortcut to show/hide)
+- [ ] Trigger manual personality scenario questionnaire (16Personalities style)
 - [ ] Manual sync trigger button
 - [ ] Export backup button (copies atlas.db to chosen location)
 - [ ] Model selector (which Ollama model to use)
@@ -223,7 +231,12 @@
 - [ ] Verify no outbound network requests in DevTools while app is running
 - [ ] Plugin sandbox: test `wasmtime` isolation of external scripts
 
-### 6.2 Packaging
+### 6.2 Window & OS Integration
+- [ ] Set up system tray/menu bar launch configurations
+- [ ] Implement global hotkey registration (`Alt + Space` or user-defined)
+- [ ] Setup window focus/blur handlers (pressing `Esc` or clicking away hides app)
+
+### 6.3 Packaging
 - [ ] Configure Tauri bundler for Windows MSI
 - [ ] Configure Tauri bundler for macOS DMG (if applicable)
 - [ ] Configure Tauri bundler for Linux `.deb` (if applicable)
@@ -238,9 +251,10 @@
 - [ ] Wrong passphrase → error, no data returned
 - [ ] Correct passphrase → entity count > 0 after test import
 
-### ✅ Checkpoint B — Ingestion
+### ✅ Checkpoint B — Ingestion & Transcription
 - [ ] 50 Obsidian notes → ≥40 entities extracted
-- [ ] Entity types are varied (Project, Note, Skill, etc.)
+- [ ] Voice memo recording WAV generated on disk locally
+- [ ] Local Whisper transcription converts WAV to correct text entity matching spoken words
 - [ ] No raw PII visible in any DB column
 
 ### ✅ Checkpoint C — Retrieval
@@ -252,8 +266,13 @@
 - [ ] "What was I working on in [month]?" → cited, dated entities
 - [ ] Past-persona answer has zero post-cutoff references
 - [ ] All citation markers [1][2] link to real local file paths
+- [ ] Mirror Persona prompt injects style cues (candid vocabulary, customized slang/cursing limits)
 
-### ✅ Checkpoint E — UI
+### ✅ Checkpoint E — UI & Window Popups
+- [ ] Global shortcut toggles window visibility instantly (<100ms)
+- [ ] Focus lost (clicking away) hides the window to the tray
 - [ ] Dashboard loads < 300ms
+- [ ] Animated SVG avatar shifts paths/states based on response sentiment
 - [ ] Timeline scrolls smoothly with 1,000+ events
 - [ ] No network requests in DevTools Network tab
+

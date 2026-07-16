@@ -128,3 +128,24 @@ A derived feature — six trait scores computed from the graph:
 | Leadership | Person + Organization edge centrality |
 
 These are percentile scores (0–100) recomputed by the weekly Reflection Engine.
+
+---
+
+## 7. Extended Ingestion & Interaction Features
+
+### 7.1 Local Voice Diary (Voice Recording)
+Atlas supports recording voice memos directly through the popup interface. 
+*   **Pipeline:** Records audio (WAV format) → processes locally using a lightweight **Whisper ONNX** or `whisper.cpp` model → transcribes text directly into a `Memory` entity.
+*   **Privacy:** Audio data is processed entirely in local memory and is never sent to any external transcription API.
+
+### 7.2 Interactive Scenarios (Personality Engine)
+To supplement static files, Atlas contains a 16Personalities-style prompt generator. 
+*   **Behavior:** Periodically (or on request), the app presents a moral or situational scenario (e.g., *"A collaborator takes credit for a shared module. What is your immediate reaction?"*).
+*   **Processing:** The user responds via text or voice. Atlas parses the response to map core traits, updating the Belief and Identity DNA models.
+
+### 7.3 Mirror Persona (Conversational Tone)
+Atlas can be toggled to speak exactly like the user.
+*   **Style Extraction:** During ingestion, the engine analyzes the user's conversational text patterns (from WhatsApp/Telegram exports and daily diaries) to capture vocabulary, sentence lengths, and expression styles.
+*   **Cursing & Raw Authenticity:** The persona is allowed to curse, use slang, and display edge to a controlled degree to match the user's genuine voice. This creates an authentic mirror of the user's personality rather than a dry, sterile AI.
+*   **Avatar Expression Mapping:** The interactive avatar maps to this persona. When the AI speaks, the avatar face displays micro-expressions matching the text (e.g., smirking when expressing confidence, sighing when displaying worry).
+
