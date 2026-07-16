@@ -1,0 +1,56 @@
+[package]
+name = "atlas-app"
+version = "0.1.0"
+description = "Atlas — Local-First AI Identity System"
+authors = ["Kshitiz Khandelwal"]
+edition = "2021"
+
+[lib]
+name = "atlas_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri core
+tauri = { version = "2", features = ["tray-icon", "image-ico", "image-png"] }
+tauri-plugin-opener = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-shell = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Database — rusqlite with SQLCipher (bundled + vendored openssl) + sqlite-vec
+rusqlite = { version = "0.32", features = ["bundled-sqlcipher-vendored-openssl", "load_extension"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.25"
+openssl = { version = "0.10", features = ["vendored"] }
+
+# Encryption
+argon2 = "0.5"
+secrecy = { version = "0.8", features = ["serde"] }
+rand = "0.8"
+zeroize = { version = "1", features = ["derive"] }
+
+# BIP39 recovery phrase
+bip39 = "2"
+
+# IDs
+uuid = { version = "1", features = ["v4"] }
+hex = "0.4"
+
+# Error handling
+thiserror = "1"
+anyhow = "1"
+
+# Timestamps
+chrono = { version = "0.4", features = ["serde"] }
+
+# Notify (filesystem watch — Phase 2)
+notify = "6"

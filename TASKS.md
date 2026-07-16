@@ -13,29 +13,35 @@
   - [ ] `sqlx`, `rusqlite` or `sqlcipher` bindings
   - [ ] `secrecy` (zeroizing passphrase memory)
   - [ ] `argon2` (key derivation)
-  - [ ] `notify` (filesystem watcher)
-  - [ ] `ort` (ONNX runtime)
-  - [ ] `reqwest` (Ollama HTTP client)
-  - [ ] `tokio` (async runtime)
-- [ ] Create basic folder structure under `src-tauri/src/`
+- [x] Run `npm create tauri-app@latest` with React/TypeScript template
+- [x] Verify `tauri dev` launches without errors
+- [x] Configure `src-tauri/Cargo.toml` with all dependencies:
+  - [x] `sqlx`, `rusqlite` or `sqlcipher` bindings
+  - [x] `secrecy` (zeroizing passphrase memory)
+  - [x] `argon2` (key derivation)
+  - [x] `notify` (filesystem watcher)
+  - [x] `ort` (ONNX runtime)
+  - [x] `reqwest` (Ollama HTTP client)
+  - [x] `tokio` (async runtime)
+- [x] Create basic folder structure under `src-tauri/src/`
 
 **Verification:** `tauri dev` boots, empty app window opens. No compiler errors.
 
 ---
 
 ### 1.2 SQLCipher Encrypted Database
-- [ ] Compile SQLCipher static library (or use pre-built bindings)
-- [ ] Create `vault.rs` module
-- [ ] Implement Argon2id key derivation from master passphrase
+- [x] Compile SQLCipher static library (or use pre-built bindings)
+- [x] Create `vault.rs` module
+- [x] Implement Argon2id key derivation from master passphrase
   - Parameters: `m=65536`, `t=3`, `p=1`, 32-byte output
-- [ ] Open SQLCipher connection with derived key via `PRAGMA key`
-- [ ] Run schema initialization SQL (all tables from `04_DATABASE_DESIGN.md`)
-- [ ] Write unit test: wrong passphrase returns `SQLITE_NOTADB`
-- [ ] Write unit test: correct passphrase returns open connection
+- [x] Open SQLCipher connection with derived key via `PRAGMA key`
+- [x] Run schema initialization SQL (all tables from `04_DATABASE_DESIGN.md`)
+- [x] Write unit test: wrong passphrase returns `SQLITE_NOTADB`
+- [x] Write unit test: correct passphrase returns open connection
 
 **Verification:**
-- [ ] `atlas.db` opened in hex editor shows random bytes (encrypted ✓)
-- [ ] Schema tables visible after correct passphrase entry
+- [x] `atlas.db` opened in hex editor shows random bytes (encrypted ✓)
+- [x] Schema tables visible after correct passphrase entry
 
 ---
 
