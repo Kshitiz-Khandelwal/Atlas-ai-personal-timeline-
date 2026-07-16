@@ -167,9 +167,8 @@ impl EmbeddingsEngine {
             SELECT n.name, ne.distance
             FROM node_embeddings ne
             LEFT JOIN nodes n ON n.id = ne.node_id
-            WHERE ne.embedding MATCH ?
+            WHERE ne.embedding MATCH ? AND k = ?
             ORDER BY ne.distance
-            LIMIT ?
             "#,
         )?;
 
