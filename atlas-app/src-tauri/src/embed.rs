@@ -28,12 +28,26 @@ impl EmbeddingsEngine {
         self.model_path.exists()
     }
 
-    /// Load the ONNX model into memory
-    pub async fn load_model(&self) -> Result<()> {
+    /// Load the ONNX model into memory (and download from HuggingFace if missing)
+    pub async fn load_model(&self) -> Result<String> {
         if !self.is_model_ready().await {
-            return Err(AtlasError::Internal(
-                "Embedding model file bge-small-en-v1.5.onnx not found in models/ folder".to_string(),
-            ));
+            // Ensure models directory exists
+            if let Some(parent) = self.model_path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+
+            // Download lightweight quantized/standard bge-small ONNX model (~133MB)
+            let url = "https://huggingface.co/Xenova/bge-small-en-v1.5/resolve/main/onnx/model.onnx";
+            let response = reqwest::get(url)
+                .await
+                .map_err(|e| AtlasError::Internal(format!("Failed to download model from HuggingFace: {}", e)))?;
+
+            let bytes = response
+                .bytes()
+                .await
+                .map_err(|e| AtlasError::Internal(format!("Failed to read model bytes: {}", e)))?;
+
+            std::fs::write(&self.model_path, &bytes)?;
         }
 
         let model_path = self.model_path.clone();
@@ -48,7 +62,7 @@ impl EmbeddingsEngine {
 
         let mut guard = self.session.lock().await;
         *guard = Some(session);
-        Ok(())
+        Ok("Embedding engine ready and loaded (`bge-small-en-v1.5.onnx`)".to_string())
     }
 
     /// Generate 384-dimensional vector embedding for text

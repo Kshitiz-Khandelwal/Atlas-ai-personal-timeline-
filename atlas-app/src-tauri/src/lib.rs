@@ -67,6 +67,15 @@ async fn lock_vault(
     Ok(())
 }
 
+// IPC Command: Load or download ONNX embedding model into memory
+#[tauri::command]
+async fn load_embedding_model(
+    embed_engine: State<'_, Arc<EmbeddingsEngine>>,
+) -> Result<String, errors::AtlasError> {
+    let msg = embed_engine.load_model().await?;
+    Ok(msg)
+}
+
 // IPC Command: Generate embedding and insert node embedding
 #[tauri::command]
 async fn embed_and_store(
@@ -75,6 +84,10 @@ async fn embed_and_store(
     embed_engine: State<'_, Arc<EmbeddingsEngine>>,
     vault: State<'_, Arc<VaultManager>>,
 ) -> Result<Vec<f32>, errors::AtlasError> {
+    // Ensure model is loaded before running inference
+    if embed_engine.embed_text(&text).await.is_err() {
+        let _ = embed_engine.load_model().await?;
+    }
     let vector = embed_engine.embed_text(&text).await?;
     embed_engine.insert_embedding(&vault, &node_id, &vector).await?;
     Ok(vector)
@@ -219,6 +232,7 @@ pub fn run() {
             init_vault,
             unlock_vault,
             lock_vault,
+            load_embedding_model,
             embed_and_store,
             search_graph_vector,
             start_voice_recording,

@@ -139,7 +139,23 @@ export const App: React.FC = () => {
 
           {/* Card 2: Vector Search (`sqlite-vec` + `ort`) */}
           <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Vector Graph Search (`sqlite-vec`)</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={styles.cardTitle}>Vector Graph Search (`sqlite-vec`)</h3>
+              <button
+                style={{ ...styles.lockButton, borderColor: 'var(--color-accent-blue)', color: 'var(--color-accent-blue)' }}
+                onClick={async () => {
+                  setEmbedResult('Downloading/Loading bge-small-en-v1.5.onnx (~133MB)... please wait...');
+                  try {
+                    const msg: string = await invoke('load_embedding_model');
+                    setEmbedResult(msg);
+                  } catch (err: any) {
+                    setEmbedResult('Error loading model: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
+                  }
+                }}
+              >
+                Download & Load Model
+              </button>
+            </div>
             <p style={styles.cardDesc}>Embed text via local ONNX and query top-K nearest neighbors.</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
               <input
@@ -147,8 +163,9 @@ export const App: React.FC = () => {
                 placeholder="Enter thought or memory..."
                 value={embedText}
                 onChange={(e) => setEmbedText(e.target.value)}
+                style={{ flex: 1, padding: '8px 12px', borderRadius: 6, border: '1px solid var(--color-border-subtle)', backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
               />
-              <button onClick={handleEmbedAndSearch}>Embed & Store</button>
+              <button style={{ padding: '8px 16px', borderRadius: 6, backgroundColor: 'var(--color-accent-blue)', color: '#fff', border: 'none', cursor: 'pointer' }} onClick={handleEmbedAndSearch}>Embed & Store</button>
             </div>
             {embedResult && <div style={styles.pathBox}>{embedResult}</div>}
           </div>
