@@ -12,6 +12,7 @@ export const SettingsPage: React.FC<{ onLock: () => void }> = ({ onLock }) => {
   const [stats, setStats] = useState<VaultStats | null>(null);
   const [mirrorMode, setMirrorMode] = useState<boolean>(true);
   const [hotkeyMode, setHotkeyMode] = useState<boolean>(true);
+  const [blurHide, setBlurHide] = useState<boolean>(localStorage.getItem('atlas_blur_hide') !== 'false');
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
   const [watchedDirs, setWatchedDirs] = useState<string[]>([
     'C:\\Users\\Admin\\Atlas-Observed',
@@ -189,6 +190,22 @@ export const SettingsPage: React.FC<{ onLock: () => void }> = ({ onLock }) => {
               type="checkbox"
               checked={hotkeyMode}
               onChange={(e) => setHotkeyMode(e.target.checked)}
+              style={{ width: 18, height: 18, cursor: 'pointer' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 10, backgroundColor: 'var(--color-bg-base)', borderRadius: 10, border: '1px solid var(--color-border-subtle)' }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Spotlight Blur Auto-Hide</div>
+              <div style={{ fontSize: 11, color: 'var(--color-text-secondary)' }}>Automatically hides window to tray when clicking outside onto desktop.</div>
+            </div>
+            <input
+              type="checkbox"
+              checked={blurHide}
+              onChange={(e) => {
+                setBlurHide(e.target.checked);
+                localStorage.setItem('atlas_blur_hide', e.target.checked ? 'true' : 'false');
+              }}
               style={{ width: 18, height: 18, cursor: 'pointer' }}
             />
           </div>

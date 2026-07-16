@@ -32,7 +32,7 @@ export const App: React.FC = () => {
     }
     setupListeners();
 
-    // Global escape key listener to hide app like OS spotlight
+    // Global escape key listener & blur handler to hide app like OS spotlight
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if ('__TAURI_INTERNALS__' in window) {
@@ -44,8 +44,21 @@ export const App: React.FC = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
 
+    // Listen for window blur (clicking outside Atlas window) if in desktop mode
+    let unlistenFocus: (() => void) | undefined;
+    if ('__TAURI_INTERNALS__' in window) {
+      import('@tauri-apps/api/window').then(mod => {
+        mod.getCurrentWindow().onFocusChanged(({ payload: focused }) => {
+          if (!focused && localStorage.getItem('atlas_blur_hide') !== 'false') {
+            mod.getCurrentWindow().hide().catch(() => {});
+          }
+        }).then(u => { unlistenFocus = u; });
+      });
+    }
+
     return () => {
       if (unlisten) unlisten();
+      if (unlistenFocus) unlistenFocus();
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
