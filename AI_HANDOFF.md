@@ -53,18 +53,25 @@ All files are in: `c:\Users\Admin\Desktop\Kshitiz\Atlas\`
 | Frontend Language | **TypeScript + React 18** | Functional components, hooks only |
 | Frontend Styling | **Vanilla CSS** (CSS variables) | NO Tailwind, NO styled-components |
 | Backend Language | **Rust 1.75+** | All business logic in Rust |
-| Database | **SQLite via SQLCipher 4.x** | AES-256 page encryption |
-| Database Access | **sqlx crate 0.7.x** | Async SQLite queries |
-| Encryption | **Argon2id** → 32-byte key → SQLCipher | m=65536, t=3, p=1 |
-| Memory Safety | **secrecy crate** | Wraps passphrase, zeroes on drop |
-| Filesystem Watch | **notify crate 6.x** | Detects file additions/changes |
-| PDF Parsing | **pdf-extract crate** | Text extraction only |
-| Embedding Model | **bge-small-en-v1.5** (ONNX, 384-dim) | Stored in `assets/models/` |
-| ONNX Runtime | **ort crate** | No Python required |
-| Vector Search | **sqlite-vec extension** | KNN inside SQLite |
-| LLM Serving | **Ollama** at `localhost:11434` | HTTP REST, streaming |
-| LLM Models | `llama3:8b-instruct-q4_K_M` or `qwen2.5:7b-instruct-q4_K_M` | User installs via Ollama |
-| Plugin Sandbox | **wasmtime crate** | Future extension system |
+| Database | SQLite via SQLCipher | SQLCipher 4.x |
+| Database Driver | **`rusqlite`** + r2d2 pool (NOT sqlx — sqlx blocks load_extension) | latest |
+| Encryption | Argon2id (key derivation) + SQLCipher AES-256 | — |
+| Passphrase Recovery | BIP39 24-word mnemonic (user-held, never stored) | — |
+| Memory Safety | `secrecy` crate (zeroizing sensitive values) | — |
+| Filesystem Watch | `notify` crate | 6.x |
+| PDF Parsing | `pdf-extract` crate | latest |
+| Audio Recording | `cpal` crate | latest |
+| Voice Transcription (default) | **Whisper Small** ONNX via `ort` crate (480 MB) | — |
+| Voice Transcription (fallback) | Whisper Base ONNX via `ort` crate (145 MB) | — |
+| Embedding Model | `bge-small-en-v1.5` (ONNX format, 384-dim) | — |
+| ONNX Runtime | `ort` crate (+ CUDA/DirectML/CoreML GPU providers) | 1.x |
+| Vector Search | `sqlite-vec` extension (loaded via rusqlite) | latest |
+| LLM — no GPU | Llama 3.1 8B Instruct Q4_K_M via Ollama | 4.9 GB |
+| LLM — GPU | **Qwen3 8B Q4_K_M** via Ollama (Apache 2.0) | 5.0 GB |
+| LLM — low RAM | Phi-4-mini Q4_K_M via Ollama (MIT) | 2.5 GB |
+| LLM Serving (now) | Ollama REST at localhost:11434 | — |
+| LLM Serving (future) | llama-cpp-2 embedded Rust bindings | — |
+| Plugin Sandbox | `wasmtime` crate | latest |extension system |
 
 ---
 
