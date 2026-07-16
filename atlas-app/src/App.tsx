@@ -6,13 +6,14 @@ import { UnlockPage } from './components/UnlockPage';
 import { ChatPanel } from './components/ChatPanel';
 import { TimelineView } from './components/TimelineView';
 import { NetworkGraph } from './components/NetworkGraph';
+import { SettingsPage } from './components/SettingsPage';
 import './App.css';
 
 export const App: React.FC = () => {
   const [vaultExists, setVaultExists] = useState<boolean | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'CHAT' | 'TIMELINE' | 'GRAPH' | 'ENGINES'>('CHAT');
+  const [activeTab, setActiveTab] = useState<'CHAT' | 'TIMELINE' | 'GRAPH' | 'SETTINGS' | 'ENGINES'>('CHAT');
 
   // Phase 2 UI States
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -30,8 +31,22 @@ export const App: React.FC = () => {
       });
     }
     setupListeners();
+
+    // Global escape key listener to hide app like OS spotlight
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if ('__TAURI_INTERNALS__' in window) {
+          import('@tauri-apps/api/window').then(mod => {
+            mod.getCurrentWindow().hide().catch(() => {});
+          });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
     return () => {
       if (unlisten) unlisten();
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -100,7 +115,7 @@ export const App: React.FC = () => {
         <div style={styles.logoContainer}>
           <div style={styles.avatarMini} />
           <span style={styles.logoText}>Atlas identity OS</span>
-          <span style={styles.phaseBadge}>Phase 4 Active</span>
+          <span style={styles.phaseBadge}>Phase 5 Active</span>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div style={{ display: 'flex', backgroundColor: 'var(--color-bg-base)', padding: 4, borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
@@ -132,7 +147,7 @@ export const App: React.FC = () => {
                 fontSize: 12
               }}
             >
-              ⏳ Timeline Feed
+              ⏳ Timeline
             </button>
             <button
               onClick={() => setActiveTab('GRAPH')}
@@ -147,7 +162,22 @@ export const App: React.FC = () => {
                 fontSize: 12
               }}
             >
-              🕸️ Network Canvas
+              🕸️ Network
+            </button>
+            <button
+              onClick={() => setActiveTab('SETTINGS')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: 'none',
+                backgroundColor: activeTab === 'SETTINGS' ? 'var(--color-accent-blue)' : 'transparent',
+                color: activeTab === 'SETTINGS' ? '#fff' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 12
+              }}
+            >
+              ⚙️ Settings
             </button>
             <button
               onClick={() => setActiveTab('ENGINES')}
@@ -162,7 +192,7 @@ export const App: React.FC = () => {
                 fontSize: 12
               }}
             >
-              🛠️ Backend Engines
+              🛠️ Engines
             </button>
           </div>
           <button
@@ -184,6 +214,8 @@ export const App: React.FC = () => {
           <TimelineView />
         ) : activeTab === 'GRAPH' ? (
           <NetworkGraph />
+        ) : activeTab === 'SETTINGS' ? (
+          <SettingsPage onLock={async () => { await invoke('lock_vault'); setIsUnlocked(false); }} />
         ) : (
           <div style={styles.gridContainer}>
           

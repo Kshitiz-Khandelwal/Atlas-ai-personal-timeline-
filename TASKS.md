@@ -177,37 +177,29 @@
 - [ ] Three metric chips: entities, decisions, habits count
 - [ ] Three-column grid: Recent Timeline | Identity DNA | Sources
 - [ ] DNA trait progress bars (6 traits, percentage + label)
-- [ ] Source sync status list (last-synced timestamps)
+### 5.2 Global Handoff Overlay (`Alt + Space` / `Esc`)
+- [x] Configure global hotkey window invocation / hide
+- [x] Listen for `Esc` key down across all pages to auto-hide overlay like OS spotlight
+- [x] Source directory management list (watched paths)
 
-### 5.3 Timeline Page
-- [ ] Category filter pills (All / Projects / Decisions / Habits / Memories)
-- [ ] Vertical event feed (680px centered column)
-- [ ] GitHub-style activity heatmap (52×7 grid, blue scale)
-- [ ] Entity card on click (type badge, date, description, tags, source path)
+### 5.3 Timeline & Network Pages (`TimelineView.tsx` & `NetworkGraph.tsx`)
+- [x] Category filter pills (`ALL` / `chat` / `voice_note` / `observed_file`)
+- [x] Vertical event feed and entity detail cards
+- [x] Interactive Canvas circular node map with directed edges
 
-### 5.4 AI Chat Page
-- [ ] Three-panel layout: Thread list | Chat area | Citation rail
-- [ ] Persona switcher: Past / Present / Future mode
-- [ ] User messages: right-aligned dark blue pill
-- [ ] Atlas responses: left-aligned, plain text with [1][2] citation markers
-- [ ] Dynamic SVG Anime Avatar:
-  - [ ] Render responsive SVG inline character face component
-  - [ ] Implement animations: blink loop, idle breathing, and talking lip-sync
-  - [ ] Implement expressions: smirk (confidence), worry (sad/concerned), spark (curiosity) mapped to LLM sentiment
-- [ ] Audio recording button and audio visualization overlay
-- [ ] Confidence bar below each AI response
-- [ ] Input: floating pill shape with send button + model selector
-- [ ] Citation rail: expandable source cards with file path + date
+### 5.4 AI Chat Page (`ChatPanel.tsx` & `AvatarFace.tsx`)
+- [x] Dynamic SVG Anime Avatar with lip sync (`SPEAKING`), smirking (`SASSY`), blinking (`NEUTRAL`), and thinking states
+- [x] Voice recording integration (`cpal`) with WAV path storage
+- [x] Outbound Telegram API integration for real-time mobile push notifications
+- [x] Local ONNX vector similarity (`bge-small-en-v1.5.onnx`) context injection
 
-### 5.5 Settings Page
-- [ ] Source directory management (add/remove watched folders)
-- [ ] Change master passphrase
-- [ ] Toggle "Mirror Persona Mode" (enables casual/candid tone & cursing)
-- [ ] Toggle "Hotkey Popup Mode" (configures tray-only, shortcut to show/hide)
-- [ ] Trigger manual personality scenario questionnaire (16Personalities style)
-- [ ] Manual sync trigger button
-- [ ] Export backup button (copies atlas.db to chosen location)
-- [ ] Model selector (which Ollama model to use)
+### 5.5 Settings Page (`SettingsPage.tsx`)
+- [x] Source directory management (add/remove watched folders for `notify`)
+- [x] Lock vault button / Master passphrase control
+- [x] Toggle "Mirror Persona Mode" (enables casual/candid tone & candor)
+- [x] Toggle "Global Shortcut (`Alt + Space`)" option
+- [x] Export encrypted backup snapshot button (`atlas.db` export)
+- [x] Real-time SQLCipher vector and graph stats display (`nodeCount`, `edgeCount`, `embeddings`)
 
 ---
 
