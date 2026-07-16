@@ -69,10 +69,11 @@ Whether you want to query your exact mindset from six months ago, visualize how 
 - **Hardware Microphone Capture (`cpal`):** Record raw audio reflections right from your desk. Audio streams are captured directly into `.wav` buffers inside your encrypted vault directory.
 - **Background File Watcher (`notify`):** Designate local folders (`C:\Users\Admin\Atlas-Observed` or custom directories) where Markdown notes, code files, and diaries are ingested and vectorized automatically upon save.
 
-### 5. 🤖 Dynamic Animated Avatar & Mirror Persona
-- **Responsive Character UI (`AvatarFace.tsx`):** A high-tech, interactive SVG character face centered in your workspace. Watch it blink (`NEUTRAL`), breathe while active (`LISTENING`), squint during heavy inference (`THINKING`), and dynamically lip-sync paths (`SPEAKING`).
-- **Candid Mirror Persona Mode:** Toggle unfiltered mode to let Atlas respond with sharp candor, confident smirks (`SASSY`), and direct feedback tailored to your personality.
-- **Outbound Telegram Bot API:** Connect your personal `@BotFather` token and `chat_id` (`5552327622`) inside secure storage to push real-time summaries and reminders directly to your mobile phone.
+### 5. 🤖 3D Apple Memoji / Snapchat Bitmoji Character Engine (`AvatarFace.tsx`)
+- **Expressive 3D Avatar UI:** Centered right in your workspace is a high-tech, vibrant 3D character face styled after Apple Memoji and Snapchat Bitmoji. Featuring 3D radial skin gradients, cyber headset gear, holographic irises, and real-time cheek blush (`feGaussianBlur`).
+- **Dynamic Lip-Sync & Micro-Animations:** Watch your sidekick blink naturally (`NEUTRAL`), widen its eyes while pulsing audio rings (`LISTENING`), squint during heavy neural inference (`THINKING`), and sculpt dynamic lip-sync mouth paths (`SPEAKING`).
+- **Candid Mirror Persona & Smirk Expressions:** Toggle Mirror Persona mode for sharp candor, confident raised-cheek smirks (`SASSY` / The Rock high-arch eyebrow), and unfiltered answers tailored directly to your personality traits.
+- **Outbound Telegram Bot API:** Connect your personal `@BotFather` token and `chat_id` (`5552327622`) inside secure storage (`settings_secure`) to push real-time summaries and reminders directly to your mobile phone.
 
 ---
 
@@ -80,7 +81,7 @@ Whether you want to query your exact mindset from six months ago, visualize how 
 
 | Page / Tab | Description | Key Capabilities |
 | :--- | :--- | :--- |
-| **✨ Avatar & Chat** | Your conversational sidekick | Interactive SVG character, Voice Diary recorder (`cpal`), vector similarity recall, and Telegram outbound config. |
+| **✨ Avatar & Chat** | Your conversational sidekick | 3D Apple Memoji / Snapchat Bitmoji animated character face, Voice Diary recorder (`cpal`), vector similarity recall, and Telegram outbound config. |
 | **⏳ Timeline Feed** | Chronological identity ledger | Filter pills (`ALL`, `💬 chat`, `🎙️ voice_note`, `📄 observed_file`), version tracking (`v1`), and neighborhood edge drilldowns. |
 | **🕸️ Network Canvas** | Visual neural graph | Glowing circular hub nodes, directed relationship lines (`source -> target`), and click-to-inspect payload inspector. |
 | **⚙️ Settings** | Security & system control | Lock vault button, SQLCipher vector stats (`embeddings_metadata`), real-time `notify` directory watcher management, and one-click database backup snapshot (`atlas.db`). |
