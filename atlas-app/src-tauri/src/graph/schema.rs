@@ -34,12 +34,17 @@ pub fn initialize_schema(conn: &Connection) -> Result<()> {
         CREATE INDEX IF NOT EXISTS idx_edges_source ON edges(source_node_id);
         CREATE INDEX IF NOT EXISTS idx_edges_target ON edges(target_node_id);
 
-        -- 3. Embeddings Metadata Table (actual vectors stored in virtual sqlite-vec table)
+        -- 3. Embeddings Metadata Table & Virtual Vector Table (384-dim for bge-small)
         CREATE TABLE IF NOT EXISTS embeddings_metadata (
             node_id TEXT PRIMARY KEY,
             model_name TEXT NOT NULL,
             dimensions INTEGER NOT NULL,
             FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
+        );
+
+        CREATE VIRTUAL TABLE IF NOT EXISTS node_embeddings USING vec0(
+            node_id TEXT PRIMARY KEY,
+            embedding FLOAT[384]
         );
 
         -- 4. Timeline Events Table (temporal indexing)

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { SetupPage } from './components/SetupPage';
 import { UnlockPage } from './components/UnlockPage';
 import './App.css';
@@ -8,6 +9,13 @@ export const App: React.FC = () => {
   const [dbExists, setDbExists] = useState<boolean | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Phase 2 UI States
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [recordingPath, setRecordingPath] = useState<string | null>(null);
+  const [embedText, setEmbedText] = useState<string>('');
+  const [embedResult, setEmbedResult] = useState<string | null>(null);
+  const [observedFiles, setObservedFiles] = useState<string[]>([]);
 
   const checkState = async () => {
     try {
@@ -23,7 +31,50 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     checkState();
+
+    // Listen for file drops monitored by notify crate
+    const unlistenPromise = listen<string>('file-observed', (event) => {
+      setObservedFiles((prev) => [event.payload, ...prev.slice(0, 4)]);
+    });
+
+    return () => {
+      unlistenPromise.then((unlisten) => unlisten());
+    };
   }, []);
+
+  const handleStartRecording = async () => {
+    try {
+      await invoke('start_voice_recording');
+      setIsRecording(true);
+      setRecordingPath(null);
+    } catch (err: any) {
+      alert('Error starting microphone: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
+    }
+  };
+
+  const handleStopRecording = async () => {
+    try {
+      const path: string = await invoke('stop_voice_recording');
+      setIsRecording(false);
+      setRecordingPath(path);
+    } catch (err: any) {
+      alert('Error stopping recording: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
+      setIsRecording(false);
+    }
+  };
+
+  const handleEmbedAndSearch = async () => {
+    if (!embedText.trim()) return;
+    try {
+      const nodeId = 'node_' + Date.now();
+      await invoke('embed_and_store', { nodeId, text: embedText });
+      const results: Array<[string, number]> = await invoke('search_graph_vector', { query: embedText, topK: 3 });
+      setEmbedResult(`Stored [${nodeId}]. Top match: ${results[0] ? `${results[0][0]} (sim: ${results[0][1].toFixed(2)})` : 'None'}`);
+      setEmbedText('');
+    } catch (err: any) {
+      setEmbedResult('Error: ' + (typeof err === 'string' ? err : 'Model not loaded or missing bge-small-en-v1.5.onnx'));
+    }
+  };
 
   if (loading || dbExists === null) {
     return (
@@ -48,6 +99,7 @@ export const App: React.FC = () => {
         <div style={styles.logoContainer}>
           <div style={styles.avatarMini} />
           <span style={styles.logoText}>Atlas identity OS</span>
+          <span style={styles.phaseBadge}>Phase 2 Active</span>
         </div>
         <button
           style={styles.lockButton}
@@ -59,16 +111,70 @@ export const App: React.FC = () => {
           Lock Vault
         </button>
       </header>
+
       <main style={styles.mainContent}>
-        <div style={styles.emptyStateCard}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20 }}>Vault Active & Encrypted</h2>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, marginTop: 8 }}>
-            Phase 1 Core is initialized. Your local-first database is running with SQLCipher AES-256 and Argon2id.
-          </p>
-          <div style={styles.statusRow}>
-            <span style={styles.statusDot} />
-            <span style={{ fontSize: 13, color: 'var(--color-confidence-high)' }}>Local SQLite Vault Unlocked</span>
+        <div style={styles.gridContainer}>
+          
+          {/* Card 1: Voice Diary Capture */}
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Voice Diary Capture (`cpal`)</h3>
+            <p style={styles.cardDesc}>Record raw microphone PCM audio to local 16kHz WAV format.</p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              {!isRecording ? (
+                <button style={styles.recordBtn} onClick={handleStartRecording}>
+                  Start Recording
+                </button>
+              ) : (
+                <button style={styles.stopBtn} onClick={handleStopRecording}>
+                  Stop & Save WAV
+                </button>
+              )}
+            </div>
+            {recordingPath && (
+              <div style={styles.pathBox}>
+                Saved locally: <code>{recordingPath}</code>
+              </div>
+            )}
           </div>
+
+          {/* Card 2: Vector Search (`sqlite-vec` + `ort`) */}
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Vector Graph Search (`sqlite-vec`)</h3>
+            <p style={styles.cardDesc}>Embed text via local ONNX and query top-K nearest neighbors.</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <input
+                type="text"
+                placeholder="Enter thought or memory..."
+                value={embedText}
+                onChange={(e) => setEmbedText(e.target.value)}
+              />
+              <button onClick={handleEmbedAndSearch}>Embed & Store</button>
+            </div>
+            {embedResult && <div style={styles.pathBox}>{embedResult}</div>}
+          </div>
+
+          {/* Card 3: Filesystem Watcher (`notify`) */}
+          <div style={styles.cardFull}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={styles.cardTitle}>Filesystem Watcher (`notify`)</h3>
+                <p style={styles.cardDesc}>Monitoring directory: <code>~/Atlas-Observed/</code> for new .md, .txt, .pdf drops.</p>
+              </div>
+              <span style={styles.liveDot} />
+            </div>
+            <div style={styles.fileList}>
+              {observedFiles.length === 0 ? (
+                <span style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>No recent files observed... Drop any .md file in your Atlas-Observed folder to test!</span>
+              ) : (
+                observedFiles.map((file, i) => (
+                  <div key={i} style={styles.fileItem}>
+                    📄 <code>{file}</code>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
@@ -100,6 +206,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100vh',
     width: '100vw',
     backgroundColor: 'var(--color-bg-base)',
+    overflowY: 'auto',
   },
   header: {
     height: 56,
@@ -109,6 +216,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     padding: '0 var(--spacing-lg)',
     backgroundColor: 'var(--color-bg-surface)',
+    flexShrink: 0,
   },
   logoContainer: {
     display: 'flex',
@@ -127,6 +235,15 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 16,
     color: 'var(--color-text-primary)',
   },
+  phaseBadge: {
+    fontSize: 11,
+    fontWeight: 600,
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    color: 'var(--color-accent-blue)',
+    padding: '2px 8px',
+    borderRadius: 12,
+    marginLeft: 8,
+  },
   lockButton: {
     backgroundColor: 'transparent',
     border: '1px solid var(--color-border-subtle)',
@@ -138,33 +255,81 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     padding: 'var(--spacing-xl)',
     display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyStateCard: {
+  gridContainer: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: 'var(--spacing-lg)',
+    maxWidth: 960,
+    width: '100%',
+    alignContent: 'start',
+  },
+  card: {
     backgroundColor: 'var(--color-bg-surface)',
     border: '1px solid var(--color-border-subtle)',
     borderRadius: 12,
-    padding: 'var(--spacing-xl)',
-    maxWidth: 500,
-    width: '100%',
-    textAlign: 'center',
-  },
-  statusRow: {
+    padding: 'var(--spacing-lg)',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 'var(--spacing-lg)',
-    padding: 'var(--spacing-sm)',
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-    borderRadius: 6,
+    flexDirection: 'column',
   },
-  statusDot: {
-    width: 8,
-    height: 8,
+  cardFull: {
+    gridColumn: 'span 2',
+    backgroundColor: 'var(--color-bg-surface)',
+    border: '1px solid var(--color-border-subtle)',
+    borderRadius: 12,
+    padding: 'var(--spacing-lg)',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  cardTitle: {
+    fontFamily: 'var(--font-display)',
+    fontSize: 16,
+    fontWeight: 600,
+    color: 'var(--color-text-primary)',
+  },
+  cardDesc: {
+    color: 'var(--color-text-secondary)',
+    fontSize: 13,
+    marginTop: 4,
+  },
+  recordBtn: {
+    backgroundColor: 'hsl(142, 60%, 45%)',
+  },
+  stopBtn: {
+    backgroundColor: 'hsl(0, 70%, 50%)',
+    animation: 'pulse 1.5s infinite',
+  },
+  pathBox: {
+    marginTop: 16,
+    padding: 10,
+    backgroundColor: 'var(--color-bg-base)',
+    border: '1px solid var(--color-border-subtle)',
+    borderRadius: 6,
+    fontSize: 12,
+    color: 'var(--color-accent-blue)',
+    fontFamily: 'var(--font-mono)',
+    wordBreak: 'break-all',
+  },
+  fileList: {
+    marginTop: 16,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+  },
+  fileItem: {
+    padding: '8px 12px',
+    backgroundColor: 'var(--color-bg-base)',
+    borderRadius: 6,
+    fontSize: 13,
+    fontFamily: 'var(--font-mono)',
+    border: '1px solid var(--color-border-subtle)',
+  },
+  liveDot: {
+    width: 10,
+    height: 10,
     borderRadius: '50%',
-    backgroundColor: 'var(--color-confidence-high)',
+    backgroundColor: 'hsl(142, 60%, 45%)',
   },
 };
 

@@ -24,6 +24,14 @@ pub struct VaultManager {
 impl VaultManager {
     pub fn new(app_data_dir: PathBuf) -> Self {
         let db_path = app_data_dir.join("atlas.db");
+        
+        // Register sqlite-vec auto extension so all rusqlite connections support vec0
+        unsafe {
+            rusqlite::ffi::sqlite3_auto_extension(Some(std::mem::transmute(
+                sqlite_vec::sqlite3_vec_init as *const (),
+            )));
+        }
+
         Self {
             db_path,
             pool: Arc::new(Mutex::new(None)),
@@ -157,6 +165,15 @@ impl VaultManager {
     pub async fn is_unlocked(&self) -> bool {
         let guard = self.pool.lock().await;
         guard.is_some()
+    }
+
+    /// Get a clone of the active database connection pool if unlocked
+    pub async fn get_pool(&self) -> Result<DbPool> {
+        let guard = self.pool.lock().await;
+        match &*guard {
+            Some(pool) => Ok(pool.clone()),
+            None => Err(AtlasError::VaultLocked),
+        }
     }
 
     /// Recover vault using BIP39 recovery phrase and set a new passphrase

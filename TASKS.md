@@ -46,23 +46,27 @@
 ---
 
 ### 1.3 Onboarding UI (Passphrase Setup)
-- [ ] Build `SetupPage.tsx` — first-run passphrase creation screen
-- [ ] Build passphrase strength meter component
-- [ ] Generate BIP39 recovery key (display once, do not store)
-- [ ] Build `UnlockPage.tsx` — returning user passphrase entry
-- [ ] Wire up Tauri IPC: `unlock_vault(passphrase: string)` → Rust
+- [x] Build `SetupPage.tsx` — first-run passphrase creation screen
+- [x] Build passphrase strength meter component
+- [x] Generate BIP39 recovery key (display once, do not store)
+- [x] Build `UnlockPage.tsx` — returning user passphrase entry
+- [x] Wire up Tauri IPC: `unlock_vault(passphrase: string)` → Rust
 
 ---
 
-## Phase 2: Ingestion Engines
+## Phase 2: Ingestion & Local AI Engines
 
-### 2.1 Directory Watcher
-- [ ] Create `ingestion/mod.rs`
-- [ ] Implement `notify` watcher on user-configured source directories
-- [ ] Queue file change events for parser dispatch
+### 2.1 Directory Watcher & Audio Capture
+- [x] Create `watcher.rs`
+- [x] Implement `notify` watcher on `~/Atlas-Observed/` source directory
+- [x] Queue file change events (`file-observed`) for parser dispatch to frontend
+- [x] Create `audio.rs` (`cpal`) for raw microphone recording & clean 16kHz mono WAV export (`diary_ts.wav`)
 
-### 2.2 Markdown / Obsidian Parser
-- [ ] Create `ingestion/markdown.rs`
+### 2.2 Vector Embeddings & sqlite-vec Search
+- [x] Create `embed.rs` with `ort` ONNX Runtime engine (`bge-small-en-v1.5.onnx`)
+- [x] Register `sqlite-vec` virtual table (`vec0`) inside `rusqlite` connections (`node_embeddings`)
+- [x] Implement vector similarity query via `MATCH ? ORDER BY distance LIMIT ?`
+- [x] Build Phase 2 interactive test dashboard (`App.tsx`) with real-time UI controls
 - [ ] Parse YAML frontmatter fields (date, tags, status)
 - [ ] Extract H1 / H2 headings as entity names
 - [ ] Extract `[[wikilinks]]` as graph edge candidates

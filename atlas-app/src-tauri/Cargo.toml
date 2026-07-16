@@ -52,5 +52,13 @@ anyhow = "1"
 # Timestamps
 chrono = { version = "0.4", features = ["serde"] }
 
-# Notify (filesystem watch — Phase 2)
+# Notify & filesystem watch (Phase 2)
 notify = "6"
+dirs = "5"
+
+# Phase 2: Local AI & Audio Pipeline
+cpal = "0.15"
+ort = { version = "2.0.0-rc.9", features = ["ndarray"] }
+ndarray = "0.16"
+reqwest = { version = "0.12", features = ["json"] }
+sqlite-vec = "0.1"
