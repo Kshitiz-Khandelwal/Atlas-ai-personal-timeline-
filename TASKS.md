@@ -115,29 +115,24 @@
 
 ---
 
-## Phase 3: Identity Graph + Vector Search
+## Phase 3: Interactive Animated Avatar Face & Outbound Telegram Bot
 
-### 3.1 SQL Schema Initialization
-- [ ] Create `graph/schema.rs` with all `CREATE TABLE IF NOT EXISTS` statements
-- [ ] Run on first vault open
-- [ ] Verify all 25+ tables created correctly
+### 3.1 Identity Graph & Vector Engine (Completed in Phase 1 & 2)
+- [x] SQL schema initialization (`graph/schema.rs`) across all 25+ tables
+- [x] ONNX `bge-small-en-v1.5` embedding pipeline (`embed.rs` via `ort`)
+- [x] `sqlite-vec` virtual table (`vec0`) and KNN similarity search (`AND k = ?`)
 
-### 3.2 ONNX Embedding Pipeline
-- [ ] Download `bge-small-en-v1.5` ONNX model (place in `assets/models/`)
-- [ ] Create `embeddings.rs`
-- [ ] Load model via `ort` crate on app startup
-- [ ] Implement `embed(text: &str) -> Vec<f32>` function (384-dim output)
-- [ ] Write to `embeddings` table after each node insert
+### 3.2 Dynamic Animated Avatar Face (`AvatarFace.tsx`)
+- [x] Build `AvatarFace.tsx` SVG engine with smooth morphing paths (eyes, brows, mouth)
+- [x] Implement emotional/conversational states (`NEUTRAL`, `LISTENING`, `THINKING`, `SPEAKING`, `SARCASM/SASSY`)
+- [x] Add micro-animations (blinking, breathing, reactive lip-syncing when speaking)
+- [x] Connect avatar state directly to voice recording (`cpal`) and AI inference states
 
-**Verification:**
-- [ ] Embed "I started learning Rust" → 384-element float vector returned
-- [ ] Embedding inference < 50ms on CPU
-
-### 3.3 sqlite-vec KNN Search
-- [ ] Load `sqlite-vec` extension into SQLCipher connection
-- [ ] Create virtual table `vec_items` mirroring `embeddings`
-- [ ] Implement KNN query: top 20 nearest nodes to query vector
-- [ ] Write retrieval integration test
+### 3.3 Outbound Telegram Reminder Bot (`telegram.rs`)
+- [x] Create `telegram.rs` background service using `reqwest` HTTP client
+- [x] Implement encrypted storage for `telegram_bot_token` and `telegram_chat_id` in SQLCipher table (`settings_secure`)
+- [x] Create `send_telegram_message` and `test_telegram_connection` IPC commands
+- [x] Wire up UI config panel in React dashboard (`ChatPanel.tsx`) for instant phone pinging
 
 **Verification:**
 - [ ] 1,000 nodes → KNN query returns in < 200ms

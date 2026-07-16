@@ -2,6 +2,7 @@ pub mod audio;
 pub mod embed;
 pub mod errors;
 pub mod graph;
+pub mod telegram;
 pub mod vault;
 pub mod watcher;
 
@@ -17,6 +18,7 @@ use vault::VaultManager;
 use embed::EmbeddingsEngine;
 use audio::AudioRecorder;
 use watcher::FilesystemWatcher;
+use telegram::TelegramEngine;
 
 // IPC Command: Check if db exists and if unlocked
 #[tauri::command]
@@ -124,6 +126,39 @@ async fn stop_voice_recording(
     Ok(path.to_string_lossy().to_string())
 }
 
+// IPC Command: Save Telegram configuration
+#[tauri::command]
+async fn save_telegram_config(
+    bot_token: String,
+    chat_id: String,
+    telegram: State<'_, Arc<TelegramEngine>>,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<(), errors::AtlasError> {
+    telegram.save_credentials(&vault, &bot_token, &chat_id).await?;
+    Ok(())
+}
+
+// IPC Command: Get saved Telegram configuration
+#[tauri::command]
+async fn get_telegram_config(
+    telegram: State<'_, Arc<TelegramEngine>>,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<(Option<String>, Option<String>), errors::AtlasError> {
+    let creds = telegram.get_credentials(&vault).await?;
+    Ok(creds)
+}
+
+// IPC Command: Send outbound Telegram message
+#[tauri::command]
+async fn send_telegram_update(
+    message: String,
+    telegram: State<'_, Arc<TelegramEngine>>,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<String, errors::AtlasError> {
+    let res = telegram.send_message(&vault, &message).await?;
+    Ok(res)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -142,11 +177,13 @@ pub fn run() {
             let embed_engine = Arc::new(EmbeddingsEngine::new(app_data_dir.clone()));
             let audio_recorder = Arc::new(AudioRecorder::new(app_data_dir.clone()));
             let filesystem_watcher = Arc::new(FilesystemWatcher::new());
+            let telegram_engine = Arc::new(TelegramEngine::new());
 
             app.manage(vault_manager.clone());
             app.manage(embed_engine.clone());
             app.manage(audio_recorder.clone());
             app.manage(filesystem_watcher.clone());
+            app.manage(telegram_engine.clone());
 
             // Setup System Tray
             let show_i = tauri::menu::MenuItem::with_id(app, "toggle", "Toggle Atlas", true, None::<&str>).unwrap();
@@ -237,6 +274,9 @@ pub fn run() {
             search_graph_vector,
             start_voice_recording,
             stop_voice_recording,
+            save_telegram_config,
+            get_telegram_config,
+            send_telegram_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

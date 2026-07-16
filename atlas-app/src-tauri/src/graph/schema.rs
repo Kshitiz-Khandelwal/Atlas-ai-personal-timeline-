@@ -21,6 +21,12 @@ pub fn initialize_schema(conn: &Connection) -> Result<()> {
         CREATE INDEX IF NOT EXISTS idx_nodes_created_at ON nodes(created_at);
         CREATE INDEX IF NOT EXISTS idx_nodes_parent_version ON nodes(parent_version_id);
 
+        -- Settings / Secure Keys Table (encrypted inside SQLCipher)
+        CREATE TABLE IF NOT EXISTS settings_secure (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+
         -- 2. Edges Table (directed relationships between nodes)
         CREATE TABLE IF NOT EXISTS edges (
             id TEXT PRIMARY KEY,

@@ -3,12 +3,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { SetupPage } from './components/SetupPage';
 import { UnlockPage } from './components/UnlockPage';
+import { ChatPanel } from './components/ChatPanel';
 import './App.css';
 
 export const App: React.FC = () => {
   const [dbExists, setDbExists] = useState<boolean | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'CHAT' | 'ENGINES'>('CHAT');
 
   // Phase 2 UI States
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -101,19 +103,56 @@ export const App: React.FC = () => {
           <span style={styles.logoText}>Atlas identity OS</span>
           <span style={styles.phaseBadge}>Phase 2 Active</span>
         </div>
-        <button
-          style={styles.lockButton}
-          onClick={async () => {
-            await invoke('lock_vault');
-            setIsUnlocked(false);
-          }}
-        >
-          Lock Vault
-        </button>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <div style={{ display: 'flex', backgroundColor: 'var(--color-bg-base)', padding: 4, borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
+            <button
+              onClick={() => setActiveTab('CHAT')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 6,
+                border: 'none',
+                backgroundColor: activeTab === 'CHAT' ? 'var(--color-accent-blue)' : 'transparent',
+                color: activeTab === 'CHAT' ? '#fff' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 13
+              }}
+            >
+              ✨ Phase 3: Avatar & Chat
+            </button>
+            <button
+              onClick={() => setActiveTab('ENGINES')}
+              style={{
+                padding: '6px 14px',
+                borderRadius: 6,
+                border: 'none',
+                backgroundColor: activeTab === 'ENGINES' ? 'var(--color-accent-blue)' : 'transparent',
+                color: activeTab === 'ENGINES' ? '#fff' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 13
+              }}
+            >
+              🛠️ Phase 2: Backend Engines
+            </button>
+          </div>
+          <button
+            style={styles.lockButton}
+            onClick={async () => {
+              await invoke('lock_vault');
+              setIsUnlocked(false);
+            }}
+          >
+            Lock Vault
+          </button>
+        </div>
       </header>
 
       <main style={styles.mainContent}>
-        <div style={styles.gridContainer}>
+        {activeTab === 'CHAT' ? (
+          <ChatPanel />
+        ) : (
+          <div style={styles.gridContainer}>
           
           {/* Card 1: Voice Diary Capture */}
           <div style={styles.card}>
@@ -193,6 +232,7 @@ export const App: React.FC = () => {
           </div>
 
         </div>
+        )}
       </main>
     </div>
   );
