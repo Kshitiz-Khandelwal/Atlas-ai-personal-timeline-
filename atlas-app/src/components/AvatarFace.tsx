@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export type AvatarState = 'NEUTRAL' | 'LISTENING' | 'THINKING' | 'SPEAKING' | 'SASSY';
 
@@ -7,246 +7,280 @@ interface AvatarFaceProps {
   size?: number;
 }
 
-export const AvatarFace: React.FC<AvatarFaceProps> = ({ state, size = 160 }) => {
-  // Dynamic glow colors based on AI mindset
-  const getGlowColor = () => {
-    switch (state) {
-      case 'LISTENING': return '#10b981'; // Emerald audio capture
-      case 'THINKING': return '#8b5cf6';  // Deep purple neural inference
-      case 'SPEAKING': return '#06b6d4';  // Cyan active speech
-      case 'SASSY': return '#f59e0b';     // Amber/Gold candid smirk
-      case 'NEUTRAL':
-      default: return '#38bdf8';          // Sky blue idle
-    }
-  };
+// One consistent "character" identity — a glossy lavender blob head, like a
+// cross between Apple Memoji's soft 3D material and Siri's colored glow.
+// The head material never changes; only the aura, eyes and mouth shift per
+// state, so it reads as one character having different moods rather than
+// five different faces.
 
-  const glowColor = getGlowColor();
+const ACCENT: Record<AvatarState, { glow: string; name: string }> = {
+  NEUTRAL: { glow: '#7DD3FC', name: 'sky' },
+  LISTENING: { glow: '#34D399', name: 'emerald' },
+  THINKING: { glow: '#A78BFA', name: 'violet' },
+  SPEAKING: { glow: '#22D3EE', name: 'cyan' },
+  SASSY: { glow: '#FBBF24', name: 'amber' },
+};
+
+export const AvatarFace: React.FC<AvatarFaceProps> = ({ state, size = 160 }) => {
+  const accent = ACCENT[state].glow;
+
+  // Idle blink — independent of emotional state, purely a life-like tic.
+  const [blink, setBlink] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    const cycle = () => {
+      const delay = 2600 + Math.random() * 2600;
+      window.setTimeout(() => {
+        if (cancelled) return;
+        setBlink(true);
+        window.setTimeout(() => !cancelled && setBlink(false), 140);
+        cycle();
+      }, delay);
+    };
+    cycle();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const isState = (s: AvatarState) => state === s;
 
   return (
-    <div style={{
-      width: size,
-      height: size,
-      position: 'relative',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: '0 auto',
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
-    }}>
-      {/* Outer Holographic Radar & Audio Rings */}
+    <div
+      style={{
+        width: size,
+        height: size,
+        position: 'relative',
+        margin: '0 auto',
+      }}
+    >
       <svg
         width={size}
         height={size}
         viewBox="0 0 200 200"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          filter: `drop-shadow(0 0 16px ${glowColor}66)`,
-          animation: state === 'THINKING' ? 'spin 4s linear infinite' : state === 'LISTENING' ? 'pulse 1.4s ease-in-out infinite' : 'none'
-        }}
-      >
-        <circle
-          cx="100"
-          cy="100"
-          r="94"
-          fill="none"
-          stroke={glowColor}
-          strokeWidth="2"
-          strokeDasharray="140 40 80 40"
-          strokeLinecap="round"
-          style={{ opacity: 0.6, transition: 'stroke 0.4s ease' }}
-        />
-        <circle
-          cx="100"
-          cy="100"
-          r="84"
-          fill="none"
-          stroke="var(--color-border-subtle)"
-          strokeWidth="1.5"
-          strokeDasharray="4 8"
-          style={{ opacity: 0.35 }}
-        />
-      </svg>
-
-      {/* 3D Memoji / Bitmoji Character Head Container */}
-      <svg
-        width={size * 0.85}
-        height={size * 0.85}
-        viewBox="0 0 160 160"
-        style={{
-          zIndex: 2,
-          transition: 'transform 0.4s ease',
-          transform: state === 'SPEAKING' ? 'scale(1.05)' : state === 'LISTENING' ? 'scale(1.06)' : 'scale(1)'
-        }}
+        style={{ display: 'block', overflow: 'visible' }}
       >
         <defs>
-          {/* 3D Skin/Head Shading Gradient */}
-          <radialGradient id="faceGradient" cx="45%" cy="35%" r="65%">
-            <stop offset="0%" stopColor="#2a3854" />
-            <stop offset="60%" stopColor="#131c2e" />
-            <stop offset="100%" stopColor="#080c14" />
+          {/* Glossy plastic material for the head */}
+          <radialGradient id="headGrad" cx="38%" cy="28%" r="75%">
+            <stop offset="0%" stopColor="#F4F1FF" />
+            <stop offset="45%" stopColor="#C9BFFB" />
+            <stop offset="80%" stopColor="#8B7CF2" />
+            <stop offset="100%" stopColor="#6857D6" />
           </radialGradient>
 
-          {/* Cyber Headset Metallic Shading */}
-          <linearGradient id="headsetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#334155" />
-            <stop offset="50%" stopColor="#1e293b" />
-            <stop offset="100%" stopColor="#0f172a" />
-          </linearGradient>
+          <radialGradient id="earGrad" cx="35%" cy="30%" r="75%">
+            <stop offset="0%" stopColor="#D8CFFC" />
+            <stop offset="100%" stopColor="#7A6BE0" />
+          </radialGradient>
 
-          {/* Eye Iris Holographic Gradient */}
-          <radialGradient id="irisGrad" cx="40%" cy="40%" r="60%">
+          <radialGradient id="irisGrad" cx="35%" cy="30%" r="70%">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="30%" stopColor={glowColor} />
-            <stop offset="85%" stopColor="#0284c7" />
-            <stop offset="100%" stopColor="#0c4a6e" />
+            <stop offset="25%" stopColor={accent} />
+            <stop offset="100%" stopColor="#1e1b4b" />
           </radialGradient>
 
-          {/* Cheek Blush Filter */}
-          <filter id="blush">
-            <feGaussianBlur stdDeviation="4" />
+          <radialGradient id="auraGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={accent} stopOpacity="0.55" />
+            <stop offset="60%" stopColor={accent} stopOpacity="0.18" />
+            <stop offset="100%" stopColor={accent} stopOpacity="0" />
+          </radialGradient>
+
+          <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6" />
+          </filter>
+          <filter id="bigBlur" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="10" />
           </filter>
         </defs>
 
-        {/* Head Shadow / Back Rim Light */}
-        <ellipse cx="80" cy="85" rx="58" ry="62" fill="none" stroke={glowColor} strokeWidth="3" opacity="0.35" />
-
-        {/* 3D Sculpted Face Base */}
-        <path
-          d="M 28 72 C 28 36, 132 36, 132 72 C 132 115, 115 142, 80 142 C 45 142, 28 115, 28 72 Z"
-          fill="url(#faceGradient)"
-          stroke="rgba(255, 255, 255, 0.12)"
-          strokeWidth="1.5"
+        {/* ---- Siri-style ambient aura, breathing behind the head ---- */}
+        <circle
+          cx="100"
+          cy="102"
+          r="92"
+          fill="url(#auraGrad)"
+          filter="url(#bigBlur)"
+          style={{
+            transition: 'fill 0.5s ease',
+            animation:
+              state === 'LISTENING'
+                ? 'auraPulse 1.1s ease-in-out infinite'
+                : state === 'THINKING'
+                ? 'auraPulse 2.2s ease-in-out infinite'
+                : 'auraBreathe 3.6s ease-in-out infinite',
+          }}
         />
 
-        {/* Cheek Blush (Glows when speaking or sassy) */}
-        <ellipse cx="45" cy="98" rx="12" ry="7" fill={glowColor} opacity={state === 'SASSY' || state === 'SPEAKING' ? 0.28 : 0.1} filter="url(#blush)" />
-        <ellipse cx="115" cy="98" rx="12" ry="7" fill={glowColor} opacity={state === 'SASSY' || state === 'SPEAKING' ? 0.28 : 0.1} filter="url(#blush)" />
+        {/* ---- Grounding shadow ---- */}
+        <ellipse cx="100" cy="192" rx="46" ry="7" fill="#0f0b2e" opacity="0.18" filter="url(#softBlur)" />
 
-        {/* Futuristic Cyber-Headset (Bitmoji / Apple Vision Pro vibe) */}
-        <path
-          d="M 20 65 Q 24 30 80 26 Q 136 30 140 65"
-          fill="none"
-          stroke="url(#headsetGrad)"
-          strokeWidth="10"
-          strokeLinecap="round"
-        />
-        {/* Headset Ear Nodes with Glowing Status LED */}
-        <rect x="14" y="62" width="12" height="26" rx="6" fill="url(#headsetGrad)" stroke={glowColor} strokeWidth="1.5" />
-        <rect x="134" y="62" width="12" height="26" rx="6" fill="url(#headsetGrad)" stroke={glowColor} strokeWidth="1.5" />
-        <circle cx="20" cy="75" r="2.5" fill={glowColor} />
-        <circle cx="140" cy="75" r="2.5" fill={glowColor} />
+        {/* ---- Head + face group, gentle idle bob ---- */}
+        <g style={{ animation: 'bob 4.5s ease-in-out infinite', transformOrigin: '100px 100px' }}>
+          {/* Antenna — the character's signature trait, tip glows with state color */}
+          <line x1="100" y1="28" x2="100" y2="10" stroke="#8B7CF2" strokeWidth="4" strokeLinecap="round" />
+          <circle
+            cx="100"
+            cy="8"
+            r="6"
+            fill={accent}
+            style={{
+              transition: 'fill 0.5s ease',
+              animation: 'antennaGlow 2s ease-in-out infinite',
+            }}
+          />
 
-        {/* --- EYEBROWS (3D Shaded & Expressive) --- */}
-        {state === 'SASSY' ? (
-          <>
-            {/* Left Eyebrow (Lowered / Smirk) */}
-            <path d="M 38 54 Q 50 56 62 55" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-            {/* Right Eyebrow (The Rock High Arch) */}
-            <path d="M 96 44 Q 108 38 122 48" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-          </>
-        ) : state === 'LISTENING' ? (
-          <>
-            {/* Both Eyebrows Raised Wide */}
-            <path d="M 38 46 Q 50 42 62 46" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-            <path d="M 98 46 Q 110 42 122 46" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-          </>
-        ) : state === 'THINKING' ? (
-          <>
-            {/* Focused Squint Eyebrows */}
-            <path d="M 40 54 Q 50 56 60 53" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-            <path d="M 100 53 Q 110 56 120 54" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-          </>
-        ) : (
-          <>
-            {/* Neutral Smooth Eyebrows */}
-            <path d="M 38 50 Q 50 48 62 50" fill="none" stroke="#cbd5e1" strokeWidth="4" strokeLinecap="round" opacity="0.9" />
-            <path d="M 98 50 Q 110 48 122 50" fill="none" stroke="#cbd5e1" strokeWidth="4" strokeLinecap="round" opacity="0.9" />
-          </>
-        )}
+          {/* Ears */}
+          <circle cx="20" cy="102" r="13" fill="url(#earGrad)" />
+          <circle cx="180" cy="102" r="13" fill="url(#earGrad)" />
+          <circle cx="20" cy="102" r="4" fill={accent} opacity="0.9" style={{ transition: 'fill 0.5s ease' }} />
+          <circle cx="180" cy="102" r="4" fill={accent} opacity="0.9" style={{ transition: 'fill 0.5s ease' }} />
 
-        {/* --- 3D EXPRESSIVE EYES --- */}
-        {state === 'THINKING' ? (
-          <>
-            {/* Deep Thought Half-Closed Slits */}
-            <rect x="42" y="66" width="18" height="6" rx="3" fill="url(#irisGrad)" />
-            <rect x="100" y="66" width="18" height="6" rx="3" fill="url(#irisGrad)" />
-          </>
-        ) : state === 'LISTENING' ? (
-          <>
-            {/* Wide Alert Irises */}
-            <circle cx="51" cy="68" r="12" fill="#0f172a" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-            <circle cx="51" cy="68" r="9" fill="url(#irisGrad)" />
-            <circle cx="109" cy="68" r="12" fill="#0f172a" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-            <circle cx="109" cy="68" r="9" fill="url(#irisGrad)" />
-            {/* Catchlight Reflections */}
-            <circle cx="54" cy="65" r="3" fill="#ffffff" />
-            <circle cx="112" cy="65" r="3" fill="#ffffff" />
-          </>
-        ) : (
-          <>
-            {/* Standard Apple Memoji 3D Capsule Eyes */}
-            <rect x="40" y="60" width="22" height="18" rx="9" fill="#0f172a" />
-            <circle cx="51" cy="69" r="7.5" fill="url(#irisGrad)" />
-            <circle cx="54" cy="66" r="2.5" fill="#ffffff" />
+          {/* Head */}
+          <path
+            d="M 100 28 C 146 28 170 62 170 100 C 170 144 142 182 100 182 C 58 182 30 144 30 100 C 30 62 54 28 100 28 Z"
+            fill="url(#headGrad)"
+            stroke="rgba(255,255,255,0.5)"
+            strokeWidth="1.5"
+          />
 
-            <rect x="98" y="60" width="22" height="18" rx="9" fill="#0f172a" />
-            <circle cx="109" cy="69" r="7.5" fill="url(#irisGrad)" />
-            <circle cx="112" cy="66" r="2.5" fill="#ffffff" />
-          </>
-        )}
+          {/* Specular highlight, gives the glossy Memoji-plastic look */}
+          <ellipse cx="70" cy="58" rx="26" ry="16" fill="#ffffff" opacity="0.4" filter="url(#softBlur)" />
 
-        {/* 3D Subtle Nose Bridge */}
-        <path d="M 80 76 L 76 88 Q 80 90 84 88 Z" fill="rgba(255, 255, 255, 0.05)" />
+          {/* Cheek blush */}
+          <ellipse
+            cx="52" cy="120" rx="11" ry="6.5" fill="#FF8FAE"
+            opacity={isState('SASSY') || isState('SPEAKING') ? 0.5 : 0.22}
+            filter="url(#softBlur)"
+            style={{ transition: 'opacity 0.4s ease' }}
+          />
+          <ellipse
+            cx="148" cy="120" rx="11" ry="6.5" fill="#FF8FAE"
+            opacity={isState('SASSY') || isState('SPEAKING') ? 0.5 : 0.22}
+            filter="url(#softBlur)"
+            style={{ transition: 'opacity 0.4s ease' }}
+          />
 
-        {/* --- SCULPTED 3D MOUTH & LIP-SYNC --- */}
-        {state === 'SPEAKING' ? (
-          <g style={{ animation: 'lipSync 0.35s ease-in-out infinite alternate' }}>
-            {/* Mouth Cavity */}
-            <path
-              d="M 54 108 Q 80 126 106 108 Q 80 114 54 108"
-              fill="#1e112a"
-              stroke={glowColor}
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
-            {/* Top Teeth Glint */}
-            <path d="M 62 109 Q 80 112 98 109" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.85" />
-            {/* Tongue Arc */}
-            <path d="M 68 116 Q 80 110 92 116" fill="none" stroke="#f43f5e" strokeWidth="4" strokeLinecap="round" />
+          {/* ---- Eyebrows — all variants stacked, crossfaded by opacity ---- */}
+          <g style={variantStyle(isState('NEUTRAL') || isState('SPEAKING'))}>
+            <path d="M 44 68 Q 63 62 78 67" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+            <path d="M 122 67 Q 137 62 156 68" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
           </g>
-        ) : state === 'SASSY' ? (
-          /* Sculpted Memoji Smirk Curve */
-          <path d="M 54 112 Q 76 114 106 100" fill="none" stroke="#e2e8f0" strokeWidth="4.5" strokeLinecap="round" />
-        ) : state === 'THINKING' ? (
-          /* Focused neutral dash */
-          <path d="M 66 112 Q 80 112 94 112" fill="none" stroke="#cbd5e1" strokeWidth="3.5" strokeLinecap="round" opacity="0.8" />
-        ) : state === 'LISTENING' ? (
-          /* Alert O-Shape Mouth */
-          <circle cx="80" cy="112" r="7" fill="#1e112a" stroke={glowColor} strokeWidth="3" />
-        ) : (
-          /* Warm Confident Memoji Smile */
-          <path d="M 56 108 Q 80 118 104 108" fill="none" stroke="#e2e8f0" strokeWidth="4" strokeLinecap="round" opacity="0.9" />
-        )}
+          <g style={variantStyle(isState('LISTENING'))}>
+            <path d="M 44 58 Q 63 50 78 57" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+            <path d="M 122 57 Q 137 50 156 58" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+          </g>
+          <g style={variantStyle(isState('THINKING'))}>
+            <path d="M 46 66 Q 62 76 79 71" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+            <path d="M 121 65 Q 138 58 154 62" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+          </g>
+          <g style={variantStyle(isState('SASSY'))}>
+            <path d="M 44 74 Q 62 78 79 74" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+            <path d="M 120 55 Q 138 44 158 56" fill="none" stroke="#3a2f6e" strokeWidth="5" strokeLinecap="round" />
+          </g>
+
+          {/* ---- Eyes — stacked variants + blink overlay ---- */}
+          <g style={variantStyle(isState('NEUTRAL') || isState('SPEAKING'))}>
+            <EyePair blinkScale={blink ? 0.06 : 1} eyeHeight={38} irisR={11} />
+          </g>
+          <g style={variantStyle(isState('LISTENING'))}>
+            <EyePair blinkScale={blink ? 0.06 : 1} eyeHeight={44} irisR={13} wide />
+          </g>
+          <g style={variantStyle(isState('THINKING'))}>
+            <rect x="45" y="90" width="34" height="7" rx="3.5" fill="#3a2f6e" />
+            <rect x="121" y="90" width="34" height="7" rx="3.5" fill="#3a2f6e" />
+          </g>
+          <g style={variantStyle(isState('SASSY'))}>
+            <rect x="45" y="92" width="34" height="6" rx="3" fill="#3a2f6e" />
+            <g>
+              <rect x="119" y="79" width="36" height="38" rx="16" fill="#ffffff" />
+              <circle cx="137" cy="98" r="12" fill="url(#irisGrad)" />
+              <circle cx="141" cy="94" r="3.4" fill="#ffffff" />
+            </g>
+          </g>
+
+          {/* ---- Nose shading, minimal ---- */}
+          <path d="M 100 108 L 96 122 Q 100 125 104 122 Z" fill="rgba(255,255,255,0.15)" />
+
+          {/* ---- Mouths — stacked variants ---- */}
+          <g style={variantStyle(isState('NEUTRAL'))}>
+            <path d="M 66 138 Q 100 156 134 138" fill="none" stroke="#3a2f6e" strokeWidth="5.5" strokeLinecap="round" />
+          </g>
+          <g style={variantStyle(isState('LISTENING'))}>
+            <ellipse cx="100" cy="142" rx="9" ry="11" fill="#2b2450" stroke={accent} strokeWidth="2.5" style={{ transition: 'stroke 0.5s ease' }} />
+          </g>
+          <g style={variantStyle(isState('THINKING'))}>
+            <path d="M 80 142 Q 96 148 116 140" fill="none" stroke="#3a2f6e" strokeWidth="4.5" strokeLinecap="round" />
+          </g>
+          <g style={variantStyle(isState('SASSY'))}>
+            <path d="M 68 134 Q 96 148 132 122" fill="none" stroke="#3a2f6e" strokeWidth="5.5" strokeLinecap="round" />
+          </g>
+          <g
+            style={{
+              ...variantStyle(isState('SPEAKING')),
+              animation: isState('SPEAKING') ? 'talk 0.32s ease-in-out infinite alternate' : undefined,
+              transformOrigin: '100px 142px',
+            }}
+          >
+            <path d="M 70 134 Q 100 160 130 134 Q 100 146 70 134" fill="#2b2450" stroke={accent} strokeWidth="2.5" strokeLinejoin="round" style={{ transition: 'stroke 0.5s ease' }} />
+            <path d="M 78 136 Q 100 141 122 136" fill="none" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.85" />
+          </g>
+        </g>
       </svg>
 
-      {/* Micro-animations */}
       <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes auraBreathe {
+          0%, 100% { opacity: 0.7; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.05); }
         }
-        @keyframes pulse {
-          0% { transform: scale(1); opacity: 0.8; }
-          50% { transform: scale(1.06); opacity: 1; }
-          100% { transform: scale(1); opacity: 0.8; }
+        @keyframes auraPulse {
+          0%, 100% { opacity: 0.75; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.12); }
         }
-        @keyframes lipSync {
-          0% { transform: scaleY(0.85); }
-          100% { transform: scaleY(1.25); }
+        @keyframes bob {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-3px); }
+        }
+        @keyframes antennaGlow {
+          0%, 100% { opacity: 0.75; r: 6; }
+          50% { opacity: 1; r: 7.5; }
+        }
+        @keyframes talk {
+          0% { transform: scaleY(0.75); }
+          100% { transform: scaleY(1.2); }
         }
       `}</style>
     </div>
   );
 };
+
+// Shared opacity/scale crossfade so switching states morphs smoothly
+// instead of snapping between conditionally-rendered shapes.
+function variantStyle(active: boolean): React.CSSProperties {
+  return {
+    opacity: active ? 1 : 0,
+    transition: 'opacity 0.35s ease',
+  };
+}
+
+const EyePair: React.FC<{
+  blinkScale: number;
+  eyeHeight: number;
+  irisR: number;
+  wide?: boolean;
+}> = ({ blinkScale, eyeHeight, irisR, wide }) => (
+  <>
+    <g style={{ transform: `scaleY(${blinkScale})`, transformOrigin: '62px 99px', transition: 'transform 0.1s ease' }}>
+      <rect x={wide ? 43 : 45} y={99 - eyeHeight / 2} width={wide ? 38 : 34} height={eyeHeight} rx={eyeHeight / 2} fill="#ffffff" />
+      <circle cx="62" cy="99" r={irisR} fill="url(#irisGrad)" />
+      <circle cx={65.5} cy={95.5} r={irisR * 0.3} fill="#ffffff" />
+    </g>
+    <g style={{ transform: `scaleY(${blinkScale})`, transformOrigin: '138px 99px', transition: 'transform 0.1s ease' }}>
+      <rect x={wide ? 119 : 121} y={99 - eyeHeight / 2} width={wide ? 38 : 34} height={eyeHeight} rx={eyeHeight / 2} fill="#ffffff" />
+      <circle cx="138" cy="99" r={irisR} fill="url(#irisGrad)" />
+      <circle cx={141.5} cy={95.5} r={irisR * 0.3} fill="#ffffff" />
+    </g>
+  </>
+);
+
+export default AvatarFace;
