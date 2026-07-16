@@ -1,4 +1,5 @@
 pub mod schema;
+pub mod queries;
 
 use rusqlite::Connection;
 use crate::errors::Result;

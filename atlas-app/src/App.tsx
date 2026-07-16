@@ -4,53 +4,54 @@ import { listen } from '@tauri-apps/api/event';
 import { SetupPage } from './components/SetupPage';
 import { UnlockPage } from './components/UnlockPage';
 import { ChatPanel } from './components/ChatPanel';
+import { TimelineView } from './components/TimelineView';
+import { NetworkGraph } from './components/NetworkGraph';
 import './App.css';
 
 export const App: React.FC = () => {
-  const [dbExists, setDbExists] = useState<boolean | null>(null);
+  const [vaultExists, setVaultExists] = useState<boolean | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'CHAT' | 'ENGINES'>('CHAT');
+  const [activeTab, setActiveTab] = useState<'CHAT' | 'TIMELINE' | 'GRAPH' | 'ENGINES'>('CHAT');
 
   // Phase 2 UI States
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordingPath, setRecordingPath] = useState<string | null>(null);
+  const [observedFiles, setObservedFiles] = useState<string[]>([]);
   const [embedText, setEmbedText] = useState<string>('');
   const [embedResult, setEmbedResult] = useState<string | null>(null);
-  const [observedFiles, setObservedFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    checkState();
+    let unlisten: (() => void) | undefined;
+    async function setupListeners() {
+      unlisten = await listen<string>('fs-change', (event) => {
+        setObservedFiles((prev) => [event.payload, ...prev.slice(0, 9)]);
+      });
+    }
+    setupListeners();
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, []);
 
   const checkState = async () => {
     try {
-      const [exists, unlocked]: [boolean, boolean] = await invoke('check_vault_state');
-      setDbExists(exists);
-      setIsUnlocked(unlocked);
+      const exists: boolean = await invoke('check_vault_state');
+      setVaultExists(exists);
     } catch (err) {
-      console.error('Failed to check vault state:', err);
+      console.error('Failed checking state:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    checkState();
-
-    // Listen for file drops monitored by notify crate
-    const unlistenPromise = listen<string>('file-observed', (event) => {
-      setObservedFiles((prev) => [event.payload, ...prev.slice(0, 4)]);
-    });
-
-    return () => {
-      unlistenPromise.then((unlisten) => unlisten());
-    };
-  }, []);
-
   const handleStartRecording = async () => {
     try {
       await invoke('start_voice_recording');
       setIsRecording(true);
-      setRecordingPath(null);
     } catch (err: any) {
-      alert('Error starting microphone: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
+      alert('Error starting audio: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
     }
   };
 
@@ -60,35 +61,33 @@ export const App: React.FC = () => {
       setIsRecording(false);
       setRecordingPath(path);
     } catch (err: any) {
-      alert('Error stopping recording: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
-      setIsRecording(false);
+      alert('Error stopping audio: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
     }
   };
 
   const handleEmbedAndSearch = async () => {
     if (!embedText.trim()) return;
     try {
-      const nodeId = 'node_' + Date.now();
+      const nodeId = `node_${Date.now()}`;
       await invoke('embed_and_store', { nodeId, text: embedText });
       const results: Array<[string, number]> = await invoke('search_graph_vector', { query: embedText, topK: 3 });
-      setEmbedResult(`Stored [${nodeId}]. Top match: ${results[0] ? `${results[0][0]} (sim: ${results[0][1].toFixed(2)})` : 'None'}`);
-      setEmbedText('');
+      setEmbedResult(`Stored vector. Nearest: ${JSON.stringify(results)}`);
     } catch (err: any) {
-      setEmbedResult('Error: ' + (typeof err === 'string' ? err : 'Model not loaded or missing bge-small-en-v1.5.onnx'));
+      setEmbedResult('Error: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
     }
   };
 
-  if (loading || dbExists === null) {
+  if (loading) {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.spinner} />
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>Initializing Atlas Vault...</p>
+        <p style={styles.loadingText}>Loading Atlas Core Engine...</p>
       </div>
     );
   }
 
-  if (!dbExists) {
-    return <SetupPage onUnlocked={() => { setDbExists(true); setIsUnlocked(true); }} />;
+  if (vaultExists === false) {
+    return <SetupPage onUnlocked={() => { setVaultExists(true); setIsUnlocked(true); }} />;
   }
 
   if (!isUnlocked) {
@@ -96,44 +95,74 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div style={styles.dashboard}>
+    <div style={styles.appContainer}>
       <header style={styles.header}>
         <div style={styles.logoContainer}>
           <div style={styles.avatarMini} />
           <span style={styles.logoText}>Atlas identity OS</span>
-          <span style={styles.phaseBadge}>Phase 2 Active</span>
+          <span style={styles.phaseBadge}>Phase 4 Active</span>
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div style={{ display: 'flex', backgroundColor: 'var(--color-bg-base)', padding: 4, borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
             <button
               onClick={() => setActiveTab('CHAT')}
               style={{
-                padding: '6px 14px',
+                padding: '6px 12px',
                 borderRadius: 6,
                 border: 'none',
                 backgroundColor: activeTab === 'CHAT' ? 'var(--color-accent-blue)' : 'transparent',
                 color: activeTab === 'CHAT' ? '#fff' : 'var(--color-text-secondary)',
                 cursor: 'pointer',
                 fontWeight: 600,
-                fontSize: 13
+                fontSize: 12
               }}
             >
-              ✨ Phase 3: Avatar & Chat
+              ✨ Avatar & Chat
+            </button>
+            <button
+              onClick={() => setActiveTab('TIMELINE')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: 'none',
+                backgroundColor: activeTab === 'TIMELINE' ? 'var(--color-accent-blue)' : 'transparent',
+                color: activeTab === 'TIMELINE' ? '#fff' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 12
+              }}
+            >
+              ⏳ Timeline Feed
+            </button>
+            <button
+              onClick={() => setActiveTab('GRAPH')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: 'none',
+                backgroundColor: activeTab === 'GRAPH' ? 'var(--color-accent-blue)' : 'transparent',
+                color: activeTab === 'GRAPH' ? '#fff' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 12
+              }}
+            >
+              🕸️ Network Canvas
             </button>
             <button
               onClick={() => setActiveTab('ENGINES')}
               style={{
-                padding: '6px 14px',
+                padding: '6px 12px',
                 borderRadius: 6,
                 border: 'none',
                 backgroundColor: activeTab === 'ENGINES' ? 'var(--color-accent-blue)' : 'transparent',
                 color: activeTab === 'ENGINES' ? '#fff' : 'var(--color-text-secondary)',
                 cursor: 'pointer',
                 fontWeight: 600,
-                fontSize: 13
+                fontSize: 12
               }}
             >
-              🛠️ Phase 2: Backend Engines
+              🛠️ Backend Engines
             </button>
           </div>
           <button
@@ -151,6 +180,10 @@ export const App: React.FC = () => {
       <main style={styles.mainContent}>
         {activeTab === 'CHAT' ? (
           <ChatPanel />
+        ) : activeTab === 'TIMELINE' ? (
+          <TimelineView />
+        ) : activeTab === 'GRAPH' ? (
+          <NetworkGraph />
         ) : (
           <div style={styles.gridContainer}>
           

@@ -108,6 +108,44 @@ async fn search_graph_vector(
     Ok(results)
 }
 
+// IPC Command: Get chronological timeline feed
+#[tauri::command]
+async fn get_timeline_feed(
+    limit: u32,
+    offset: u32,
+    filter_type: Option<String>,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<Vec<graph::queries::TimelineNode>, errors::AtlasError> {
+    let pool = vault.get_pool().await?;
+    let conn = pool.get().map_err(errors::AtlasError::Pool)?;
+    let nodes = graph::queries::get_timeline_nodes(&conn, limit, offset, filter_type)?;
+    Ok(nodes)
+}
+
+// IPC Command: Get full network graph
+#[tauri::command]
+async fn get_network_graph(
+    limit: u32,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<graph::queries::NetworkData, errors::AtlasError> {
+    let pool = vault.get_pool().await?;
+    let conn = pool.get().map_err(errors::AtlasError::Pool)?;
+    let data = graph::queries::get_graph_network(&conn, limit)?;
+    Ok(data)
+}
+
+// IPC Command: Get node neighbors
+#[tauri::command]
+async fn get_node_network(
+    node_id: String,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<graph::queries::NetworkData, errors::AtlasError> {
+    let pool = vault.get_pool().await?;
+    let conn = pool.get().map_err(errors::AtlasError::Pool)?;
+    let data = graph::queries::get_node_neighbors(&conn, &node_id)?;
+    Ok(data)
+}
+
 // IPC Command: Start audio recording
 #[tauri::command]
 async fn start_voice_recording(
@@ -272,6 +310,9 @@ pub fn run() {
             load_embedding_model,
             embed_and_store,
             search_graph_vector,
+            get_timeline_feed,
+            get_network_graph,
+            get_node_network,
             start_voice_recording,
             stop_voice_recording,
             save_telegram_config,

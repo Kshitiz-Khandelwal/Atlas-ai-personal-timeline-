@@ -137,48 +137,30 @@
 **Verification:**
 - [ ] 1,000 nodes → KNN query returns in < 200ms
 
-### 3.4 Graph Traversal Queries
-- [ ] Create `graph/mod.rs`
-- [ ] Implement `get_neighbors(node_id, depth)` function
-- [ ] Implement `get_shortest_path(source_id, target_id)` function
-- [ ] Implement entity deduplication check (name + type uniqueness per version chain)
+### 3.4 Graph Traversal & Timeline Queries (`graph/queries.rs`)
+- [x] Create `graph/queries.rs`
+- [x] Implement `get_node_neighbors(node_id, depth)` relationship query
+- [x] Implement `get_timeline_nodes` chronological feed extraction
+- [x] Implement `get_graph_network` visual canvas node/edge exporter
 
-### 3.5 Version Chain Logic
-- [ ] On entity update: set old node `is_current = 0`
-- [ ] Insert new node with `parent_version_id = old_node.id`
-- [ ] Verify: timeline view shows correct version history
+### 3.5 Version Chain & Entity Logic
+- [x] On entity update: set old node `is_current = 0`
+- [x] Insert new node with `parent_version_id = old_node.id`
+- [x] Verify: timeline view (`TimelineView.tsx`) shows clean version history
 
 ---
 
-## Phase 4: Local AI + Retrieval
+## Phase 4: Visual Timeline & Interactive Graph Canvas (`TimelineView.tsx` & `NetworkGraph.tsx`)
 
-### 4.1 Ollama REST Client
-- [ ] Create `ai.rs`
-- [ ] Implement `POST /api/chat` call to localhost:11434
-- [ ] Handle streaming response (SSE / chunked)
-- [ ] Implement model check: verify model is downloaded before use
+### 4.1 Chronological Identity Timeline (`TimelineView.tsx`)
+- [x] Build scrollable feed of all identity events (`chat`, `voice_note`, `observed_file`, `git_commit`)
+- [x] Add real-time entity type filter pills (`ALL`, `chat`, `voice_note`, `observed_file`, `git_commit`)
+- [x] Add neighborhood drill-down panel showing connected relationship edges on card click
 
-### 4.2 Hybrid Retrieval Scorer
-- [ ] Create `retrieval.rs`
-- [ ] Implement hybrid score: `0.5·VecScore + 0.3·GraphScore - 0.2·ΔT`
-- [ ] Filter: drop candidates where Score < 0.65
-- [ ] Return ranked list of up to 20 context nodes
-
-### 4.3 Past-Persona Temporal Filter
-- [ ] Accept `cutoff_timestamp: Option<i64>` in all retrieval queries
-- [ ] Append `AND created_at <= :cutoff` when cutoff is Some
-- [ ] Test: query with 2024 cutoff → zero 2025/2026 entities in result
-
-### 4.4 Context Packer
-- [ ] Assemble retrieved nodes into structured prompt context
-- [ ] Count tokens (approximate: chars / 4)
-- [ ] If > 6000 tokens: run recursive summarization via Ollama
-- [ ] Attach citation indices [1][2] to each context snippet
-
-### 4.5 Streaming Token Handler
-- [ ] Stream Ollama tokens via Tauri event emission
-- [ ] Parse citation markers in streaming output
-- [ ] On stream end: save conversation to `ai_conversations` table
+### 4.2 Interactive Network Canvas (`NetworkGraph.tsx`)
+- [x] Build SVG/Canvas circular hub layout mapping memory nodes to glowing color-coded circles
+- [x] Render directed relationship lines (`source_node_id -> target_node_id`) with relationship labels
+- [x] Add click-to-inspect node detail card alongside the visual network map
 
 ---
 
