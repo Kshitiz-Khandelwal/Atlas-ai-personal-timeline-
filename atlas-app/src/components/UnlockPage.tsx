@@ -3,9 +3,10 @@ import { invoke } from '@tauri-apps/api/core';
 
 interface UnlockPageProps {
   onUnlocked: () => void;
+  onReset?: () => void;
 }
 
-export const UnlockPage: React.FC<UnlockPageProps> = ({ onUnlocked }) => {
+export const UnlockPage: React.FC<UnlockPageProps> = ({ onUnlocked, onReset }) => {
   const [passphrase, setPassphrase] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,11 @@ export const UnlockPage: React.FC<UnlockPageProps> = ({ onUnlocked }) => {
       await invoke('unlock_vault', { passphrase });
       onUnlocked();
     } catch (err: any) {
-      setError(typeof err === 'string' ? err : 'Invalid passphrase.');
+      const errMsg = typeof err === 'string' ? err : (err?.message || 'Invalid passphrase.');
+      setError(errMsg);
+      if (errMsg.toLowerCase().includes('not initialized') && onReset) {
+        setTimeout(() => onReset(), 1200);
+      }
     } finally {
       setLoading(false);
     }
@@ -42,7 +47,29 @@ export const UnlockPage: React.FC<UnlockPageProps> = ({ onUnlocked }) => {
               autoFocus
             />
           </div>
-          {error && <div style={styles.error}>{error}</div>}
+          {error && (
+            <div style={styles.error}>
+              {error}
+              {error.toLowerCase().includes('not initialized') && onReset && (
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    onClick={onReset}
+                    style={{
+                      background: 'none',
+                      border: '1px underline var(--color-accent-cyan)',
+                      color: 'var(--color-accent-cyan)',
+                      cursor: 'pointer',
+                      fontSize: 12,
+                      padding: 0
+                    }}
+                  >
+                    Click here to initialize your vault now →
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           <button type="submit" style={styles.button} disabled={loading}>
             {loading ? 'Decrypting...' : 'Unlock'}
           </button>

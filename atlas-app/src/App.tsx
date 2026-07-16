@@ -65,10 +65,14 @@ export const App: React.FC = () => {
 
   const checkState = async () => {
     try {
-      const exists: boolean = await invoke('check_vault_state');
+      const res: any = await invoke('check_vault_state');
+      const exists = Array.isArray(res) ? Boolean(res[0]) : Boolean(res);
+      const unlocked = Array.isArray(res) ? Boolean(res[1]) : false;
       setVaultExists(exists);
+      if (unlocked) setIsUnlocked(true);
     } catch (err) {
       console.error('Failed checking state:', err);
+      setVaultExists(false);
     } finally {
       setLoading(false);
     }
@@ -119,7 +123,7 @@ export const App: React.FC = () => {
   }
 
   if (!isUnlocked) {
-    return <UnlockPage onUnlocked={() => setIsUnlocked(true)} />;
+    return <UnlockPage onUnlocked={() => setIsUnlocked(true)} onReset={() => setVaultExists(false)} />;
   }
 
   return (
