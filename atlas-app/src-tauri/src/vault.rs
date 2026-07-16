@@ -127,6 +127,9 @@ impl VaultManager {
         let test_conn = Connection::open(&self.db_path)?;
         test_conn.execute_batch(&format!("PRAGMA key = '{}';", key_hex))?;
         
+        // Ensure all tables (including newly added vec0 virtual tables) exist on existing vaults
+        graph::init(&test_conn)?;
+
         // Check if we can query schema (validates key)
         let count: u32 = test_conn
             .query_row("SELECT count(*) FROM sqlite_master", [], |row| row.get(0))
@@ -141,6 +144,8 @@ impl VaultManager {
                 c.execute_batch(&format!("PRAGMA key = '{}';", key_hex))?;
                 // Enable foreign keys and write-ahead logging for concurrency
                 c.execute_batch("PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;")?;
+                // Automatically create any missing extension/virtual tables (`node_embeddings`) on existing vaults
+                let _ = graph::init(c);
                 Ok(())
             });
 
