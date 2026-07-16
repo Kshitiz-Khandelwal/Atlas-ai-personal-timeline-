@@ -128,9 +128,10 @@ impl EmbeddingsEngine {
             .collect();
 
         // Ensure parent node exists to satisfy FOREIGN KEY (node_id) REFERENCES nodes(id)
+        let now = chrono::Utc::now().timestamp();
         conn.execute(
-            "INSERT OR IGNORE INTO nodes (id, label, title, source_type) VALUES (?, 'memory', ?, 'user_entry')",
-            [node_id, title],
+            "INSERT OR IGNORE INTO nodes (id, entity_type, name, content, created_at) VALUES (?, 'memory', ?, ?, ?)",
+            rusqlite::params![node_id, title, title, now],
         )?;
 
         conn.execute(
@@ -163,7 +164,7 @@ impl EmbeddingsEngine {
 
         let mut stmt = conn.prepare(
             r#"
-            SELECT n.title, ne.distance
+            SELECT n.name, ne.distance
             FROM node_embeddings ne
             LEFT JOIN nodes n ON n.id = ne.node_id
             WHERE ne.embedding MATCH ?
@@ -173,10 +174,10 @@ impl EmbeddingsEngine {
         )?;
 
         let rows = stmt.query_map(rusqlite::params![query_bytes, top_k as i64], |row| {
-            let title: Option<String> = row.get(0)?;
+            let name: Option<String> = row.get(0)?;
             let distance: f32 = row.get(1)?;
             let similarity = 1.0 - distance;
-            Ok((title.unwrap_or_else(|| "Unknown Node".to_string()), similarity))
+            Ok((name.unwrap_or_else(|| "Unknown Node".to_string()), similarity))
         })?;
 
         let mut results = Vec::new();
