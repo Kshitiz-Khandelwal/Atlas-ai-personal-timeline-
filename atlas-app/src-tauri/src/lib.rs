@@ -197,6 +197,32 @@ async fn send_telegram_update(
     Ok(res)
 }
 
+// IPC Command: Save extracted onboarding profile and responses
+#[tauri::command]
+async fn save_onboarding_profile(
+    traits: Vec<graph::persona_engine::PersonaTrait>,
+    addressing: Vec<graph::persona_engine::RelationshipAddressing>,
+    responses: Vec<graph::persona_engine::RawInterviewResponse>,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<(), errors::AtlasError> {
+    let pool = vault.get_pool().await?;
+    let conn = pool.get().map_err(errors::AtlasError::Pool)?;
+    graph::persona_engine::save_onboarding_profile(&conn, traits, addressing, responses)?;
+    Ok(())
+}
+
+// IPC Command: Get distilled mirror system prompt
+#[tauri::command]
+async fn get_mirror_system_prompt(
+    tier: Option<String>,
+    vault: State<'_, Arc<VaultManager>>,
+) -> Result<String, errors::AtlasError> {
+    let pool = vault.get_pool().await?;
+    let conn = pool.get().map_err(errors::AtlasError::Pool)?;
+    let prompt = graph::persona_engine::compile_mirror_persona_prompt(&conn, tier.as_deref())?;
+    Ok(prompt)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -318,6 +344,8 @@ pub fn run() {
             save_telegram_config,
             get_telegram_config,
             send_telegram_update,
+            save_onboarding_profile,
+            get_mirror_system_prompt,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

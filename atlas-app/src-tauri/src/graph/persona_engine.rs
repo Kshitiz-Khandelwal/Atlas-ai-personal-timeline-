@@ -202,3 +202,91 @@ pub fn resolve_addressing_context(
         sign_off_style: Some("catch you later".to_string()),
     }))
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RawInterviewResponse {
+    pub id: String,
+    pub question_id: String,
+    pub module: i32,
+    pub question_text: String,
+    pub raw_answer: String,
+    pub evidence_format: String,
+    pub confidence_rating: f32,
+    pub latent_updates_json: Option<String>,
+}
+
+/// 4. Persist Onboarding Profile (Traits + Addressing + Raw Responses)
+pub fn save_onboarding_profile(
+    conn: &Connection,
+    traits: Vec<PersonaTrait>,
+    addressing: Vec<RelationshipAddressing>,
+    responses: Vec<RawInterviewResponse>,
+) -> Result<()> {
+    let now = chrono::Utc::now().timestamp();
+
+    // 1. Insert Traits
+    for tr in traits {
+        conn.execute(
+            r#"
+            INSERT OR REPLACE INTO persona_dna 
+            (id, trait_category, trait_key, trait_value, trait_score, confidence, source, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, 'questionnaire', ?)
+            "#,
+            rusqlite::params![
+                tr.id,
+                tr.trait_category,
+                tr.trait_key,
+                tr.trait_value,
+                tr.trait_score,
+                tr.confidence,
+                now,
+            ],
+        )?;
+    }
+
+    // 2. Insert Addressing Tiers
+    for addr in addressing {
+        conn.execute(
+            r#"
+            INSERT OR REPLACE INTO relationship_addressing
+            (id, relationship_tier, person_name, how_i_address_them, how_they_address_me, greeting_style, sign_off_style, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            "#,
+            rusqlite::params![
+                addr.id,
+                addr.relationship_tier,
+                addr.person_name,
+                addr.how_i_address_them,
+                addr.how_they_address_me,
+                addr.greeting_style,
+                addr.sign_off_style,
+                now,
+            ],
+        )?;
+    }
+
+    // 3. Insert Raw Responses
+    for resp in responses {
+        conn.execute(
+            r#"
+            INSERT OR REPLACE INTO interview_responses
+            (id, question_id, module, question_text, raw_answer, evidence_format, confidence_rating, latent_updates_json, answered_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            "#,
+            rusqlite::params![
+                resp.id,
+                resp.question_id,
+                resp.module,
+                resp.question_text,
+                resp.raw_answer,
+                resp.evidence_format,
+                resp.confidence_rating,
+                resp.latent_updates_json,
+                now,
+            ],
+        )?;
+    }
+
+    Ok(())
+}
+

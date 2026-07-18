@@ -7,13 +7,14 @@ import { ChatPanel } from './components/ChatPanel';
 import { TimelineView } from './components/TimelineView';
 import { NetworkGraph } from './components/NetworkGraph';
 import { SettingsPage } from './components/SettingsPage';
+import { PersonalityCloner } from './components/PersonalityCloner';
 import './App.css';
 
 export const App: React.FC = () => {
   const [vaultExists, setVaultExists] = useState<boolean | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'CHAT' | 'TIMELINE' | 'GRAPH' | 'SETTINGS' | 'ENGINES'>('CHAT');
+  const [activeTab, setActiveTab] = useState<'CLONE' | 'CHAT' | 'TIMELINE' | 'GRAPH' | 'SETTINGS' | 'ENGINES'>('CLONE');
 
   // Phase 2 UI States
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -137,6 +138,21 @@ export const App: React.FC = () => {
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <div style={{ display: 'flex', backgroundColor: 'var(--color-bg-base)', padding: 4, borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
             <button
+              onClick={() => setActiveTab('CLONE')}
+              style={{
+                padding: '6px 12px',
+                borderRadius: 6,
+                border: 'none',
+                backgroundColor: activeTab === 'CLONE' ? 'var(--color-accent-blue)' : 'transparent',
+                color: activeTab === 'CLONE' ? '#fff' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                fontWeight: 600,
+                fontSize: 12
+              }}
+            >
+              🧬 Persona Clone
+            </button>
+            <button
               onClick={() => setActiveTab('CHAT')}
               style={{
                 padding: '6px 12px',
@@ -225,7 +241,9 @@ export const App: React.FC = () => {
       </header>
 
       <main style={styles.mainContent}>
-        {activeTab === 'CHAT' ? (
+        {activeTab === 'CLONE' ? (
+          <PersonalityCloner />
+        ) : activeTab === 'CHAT' ? (
           <ChatPanel />
         ) : activeTab === 'TIMELINE' ? (
           <TimelineView />
