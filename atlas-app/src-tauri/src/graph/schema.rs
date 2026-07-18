@@ -201,6 +201,63 @@ pub fn initialize_schema(conn: &Connection) -> Result<()> {
             source_url TEXT,
             FOREIGN KEY (node_id) REFERENCES nodes(id) ON DELETE CASCADE
         );
+
+        -- ==========================================
+        -- Behavioral Evidence & Persona DNA Tables
+        -- ==========================================
+
+        CREATE TABLE IF NOT EXISTS persona_dna (
+            id TEXT PRIMARY KEY,
+            trait_category TEXT NOT NULL,    -- 'tone' | 'slang' | 'decision' | 'humor' | 'values' | 'relationship' | 'cognitive' | 'ocean_summary'
+            trait_key TEXT NOT NULL,         -- e.g. 'formality_level', 'sarcasm_score', 'gut_vs_data', 'humor_style', 'risk_tolerance'
+            trait_value TEXT NOT NULL,       -- human-readable extracted value or verbatim evidence summary
+            trait_score REAL,                -- normalized 0.0-1.0 or latent score
+            ocean_dimension TEXT,            -- 'O' | 'C' | 'E' | 'A' | 'N' if applicable
+            mbti_axis TEXT,                  -- 'I/E' | 'N/S' | 'T/F' | 'J/P' if applicable
+            enneagram_type INTEGER,          -- 1-9 if applicable
+            confidence REAL DEFAULT 0.8,     -- extraction confidence; dynamically updated across evidence sources
+            source TEXT DEFAULT 'questionnaire', -- 'questionnaire' | 'behavioral_voice' | 'behavioral_git' | 'behavioral_chat' | 'decision_log'
+            question_id TEXT,                -- which interview question or evidence event produced this row
+            superseded_by TEXT,              -- id of newer row replacing this one (Module 5 / continuous resurvey)
+            last_updated INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_persona_dna_category ON persona_dna(trait_category);
+        CREATE INDEX IF NOT EXISTS idx_persona_dna_key ON persona_dna(trait_key);
+        CREATE INDEX IF NOT EXISTS idx_persona_dna_current ON persona_dna(last_updated) WHERE superseded_by IS NULL;
+
+        CREATE TABLE IF NOT EXISTS relationship_addressing (
+            id TEXT PRIMARY KEY,
+            relationship_tier TEXT,          -- 'best_friend' | 'parent' | 'colleague' | 'junior' | 'romantic'
+            person_name TEXT,                -- specific person if named
+            how_i_address_them TEXT,         -- e.g. "yaar", "sir", "hey"
+            how_they_address_me TEXT,        -- e.g. "bhai", "K", "ok bhai"
+            greeting_style TEXT,             -- e.g. "Yo!", "Aye bhai!", "Hey"
+            sign_off_style TEXT,             -- e.g. "catch you later", "ight"
+            tone_shift TEXT,                 -- e.g. "10% more formal", "drop all filters"
+            last_updated INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_relationship_tier ON relationship_addressing(relationship_tier);
+
+        CREATE TABLE IF NOT EXISTS interview_responses (
+            id TEXT PRIMARY KEY,
+            question_id TEXT NOT NULL,
+            module INTEGER NOT NULL,
+            question_text TEXT NOT NULL,
+            raw_answer TEXT NOT NULL,
+            evidence_format TEXT NOT NULL DEFAULT 'open', -- 'mcq' | 'sjt' | 'ranking' | 'pairwise' | 'recall' | 'prediction' | 'open'
+            confidence_rating REAL DEFAULT 0.8,           -- user self-rated confidence (1.0, 0.8, 0.6, 0.3)
+            latent_updates_json TEXT,                     -- JSON block of multi-trait latent updates e.g. {"risk_tolerance": +2, "agreeableness": -1}
+            answered_at INTEGER NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS behavioral_evidence_log (
+            id TEXT PRIMARY KEY,
+            source_type TEXT NOT NULL,       -- 'conversation_analysis' | 'writing_sample' | 'journal_entry' | 'decision_history' | 'calendar_habit'
+            evidence_summary TEXT NOT NULL,
+            extracted_traits_json TEXT NOT NULL, -- JSON block of latent updates
+            confidence REAL NOT NULL,
+            observed_at INTEGER NOT NULL
+        );
         "#
     )?;
 

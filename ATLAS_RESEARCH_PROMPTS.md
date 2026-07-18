@@ -5,238 +5,227 @@
 ---
 ---
 
-# PROMPT 1: PERSONALITY CLONING QUESTIONNAIRE ENGINE
-## The Deep Onboarding Interview — Science, Structure & Question Design
+# PROMPT 1: BEHAVIORAL EVIDENCE ENGINE & MULTI-SOURCE PERSONA GRAPH
+## The Adaptive Behavioral Onboarding — Science, Evidence Formats & Latent Scoring
 
 ---
 
-**Objective:** Research and design a scientifically grounded, psychologically validated, multi-dimensional **Personality Cloning Questionnaire** that captures a real human's authentic personality, communication style, behavioral heuristics, moral frameworks, slang, humor, decision-making patterns, and social relationship dynamics — at enough depth that an LLM (llama3.1:8b / qwen3:8b running locally via Ollama) can replicate that person's inner monologue, verbal tone, and reasoning style in real-time conversations.
+**Objective:** Research and design an adaptive **Behavioral Evidence Engine** that builds a dynamic, multi-source **Persona Graph** (`persona_dna` table & latent vector profile) for Atlas. Instead of relying on traditional self-report questionnaires where users describe how they wish or think they behave, this engine extracts **concrete behavioral evidence** from situational judgment tests, forced tradeoffs, memory recall, contradiction validation, and continuous multi-modal observation (voice, git, chat, decisions, writing idiolect).
 
-**This is NOT a generic personality test.** This is a **behavioral fingerprinting system** designed to produce a structured JSON profile (`persona_dna.json`) that gets injected into every LLM system prompt, making the AI speak, react, decide, and advise exactly as the user would — to themselves.
-
----
-
-### Research Directions — Search These Specifically
-
-**Existing GitHub Repos / Papers to Find:**
-- Search GitHub for: `personality cloning LLM`, `digital twin personality`, `persona replication language model`, `psychological profiling chatbot`, `Big Five personality LLM injection`
-- Search arXiv / Papers With Code for: `personality-conditioned language generation`, `persona consistency LLM`, `user modeling dialogue systems`, `psychological trait extraction NLP`
-- Search for: `MBTI + LLM`, `Big Five (OCEAN) + fine-tuning`, `PersonaChat dataset`, `FriendsPersona dataset`, `PersonalityEdit paper`
-
-**Foundational Psychological Frameworks to Integrate:**
-- **Big Five / OCEAN Model** (`Openness`, `Conscientiousness`, `Extraversion`, `Agreeableness`, `Neuroticism`) — each scored 0-100
-- **16 Personalities (Myers-Briggs Type Indicator / MBTI)** — `INTJ`, `ENFP`, `ISTP`, etc. — map the user's type AND map how that type communicates differently to different people
-- **Enneagram** — 9 core fear/motivation patterns (Type 1 Reformer through Type 9 Peacemaker) — critical for replicating WHY someone makes decisions, not just HOW
-- **Attachment Style** (Secure / Anxious / Avoidant / Disorganized) — how the user communicates in high-stakes relationships
-- **Love Languages** (Words of Affirmation / Acts of Service / Receiving Gifts / Quality Time / Physical Touch) — affects how user gives and receives feedback
-- **Dark Triad signals** (Machiavellianism, Narcissism, Psychopathy — subtle presence detection only, never explicit)
-- **Cognitive Style** — System 1 (gut / fast intuition) vs System 2 (slow deliberate analysis) from Kahneman
-
-**Linguistic / Communication Fingerprint Extraction:**
-- Search: `linguistic style matching LSM`, `LIWC (Linguistic Inquiry and Word Count)`, `text-based personality inference`, `idiolect modeling NLP`
-- Key dimensions to extract from the questionnaire:
-  - Formality level (casual-slang <-> precise-academic)
-  - Hedging frequency ("maybe", "sort of", "I think" — avoidant vs direct)
-  - Emotional expressiveness (emojis, exclamation marks, dry humor vs warm humor)
-  - Response length preference (terse/blunt vs elaborate/contextual)
-  - Vocabulary tier (street/regional slang <-> technical jargon <-> literary references)
+**Core Paradigm Shift: Evidence > Opinion.**
+Research over the last two years consistently demonstrates that people are unreliable narrators of their own personality. They report ideal or socially expected traits rather than actual behavioral tendencies. To ground an LLM (llama3.1:8b / qwen3:8b) so that it genuinely replicates the user's authentic inner monologue and reasoning heuristics, every onboarding question and ongoing observation must produce verifiable or situational **behavioral evidence**.
 
 ---
 
-### Questionnaire Structure — Exact Design Spec
+### Foundational Research & Academic Grounding
 
-The questionnaire must be **multi-stage, conversational, and adaptive** (not a flat form). It unfolds across **5 modules** with a total of **~80-120 questions** depending on branching. The UI presents them as a candid one-on-one conversation with the Avatar face, not a Google Form.
-
----
-
-#### MODULE 1: CORE IDENTITY & VALUES (20 Questions)
-*Goal: Extract OCEAN scores, Enneagram type, core non-negotiables*
-
-**Question types:** Scenario-forced-choice + open text hybrid
-
-Sample questions (exact wording matters — must feel like a close friend asking, not HR):
-
-1. "When a close friend asks for honest feedback on a bad idea — what do you actually say vs what do you think?"
-2. "Pick the one that's more you: (A) I've already thought 3 steps ahead before anyone else starts / (B) I figure it out as I go — the journey matters more"
-3. "What's the one thing someone can do that makes you immediately lose respect for them? No softening."
-4. "You have 72 hours to make a life-changing decision. Walk me through your actual process — not the ideal process, the real one."
-5. "Rate your brutal honesty level 1-10. Now rate how others would rate it. What's the gap and why?"
-6. "Which of these feels most like betrayal to you: (A) Someone lies to protect you / (B) Someone tells you a painful truth you didn't ask for / (C) Someone stays silent when they know you're wrong"
-7. "What does 'winning' look like in your life right now — not in 10 years, right now?"
-8. "Describe a moment where you went fully against your instincts and were right. Then one where you followed your gut and were wrong."
-9. "How do you handle someone who is consistently late or disrespects your time?"
-10. "What's your relationship with rules? (Concrete scale: 1=I follow rules even if they're wrong, 10=Rules are someone else's problem)"
-11. "What kind of advice do you actually want from people close to you when you're struggling? Be specific."
-12. "What topic can you talk about for 3 hours without getting bored?"
-13. "If you had to describe your personal operating system in 3 words — not adjectives you wish described you, actual ones — what are they?"
-14. "How do you feel about people who are significantly less ambitious than you? Be honest."
-15. "What's a belief you held 5 years ago that you now think was completely wrong?"
-16. "When you're at your worst — what does that look like? What triggers it?"
-17. "Do you believe people fundamentally change or fundamentally stay the same? What does that say about you?"
-18. "What's your relationship with money — as a tool, a scoreboard, security, or something else?"
-19. "How important is being liked vs being respected? Where do you actually land?"
-20. "If someone had to write the honest version of your life story right now — not the LinkedIn version — what would the chapter titles be?"
+**Primary Literature to Reference & Build Upon:**
+- **PersonaLLM (NAACL 2024 Findings):** Demonstrates that LLMs can consistently express assigned personalities only when the persona is properly grounded in concrete behavioral parameters rather than high-level adjective descriptions.
+- **BIG5-CHAT (ACL 2025):** Shows that dialogue-based and situational human-grounded behavioral data produces dramatically more realistic, stable LLM personas than static prompt summaries.
+- **Nature Machine Intelligence (2025):** Proposes a psychometric framework for measuring and shaping LLM personality across multiple observed behavioral signals and latent trait vectors rather than flat survey scores.
+- **LMLPA: Language Model Linguistic Personality Assessment (Computational Linguistics 2025):** Assesses personality directly through linguistic idiolect, syntax, lexical choice, and interaction drift rather than fixed questionnaires.
+- **PersonalityChat (ACL 2023):** Conversation distillation for personalized dialogue modeling combining verified facts with latent behavioral traits.
+- **Psychometric Critique of Big Five in LLMs (arXiv 2026: 2607.02325):** Warns against relying purely on standard Big Five self-report items because they miss critical dimensions of actual behavioral heuristics and situational variance.
+- **Kahneman's Cognitive Systems (System 1 vs. System 2):** Quantifying gut-reaction velocity vs. analytical deliberation thresholds under uncertainty.
 
 ---
 
-#### MODULE 2: COMMUNICATION STYLE & RELATIONSHIP DYNAMICS (25 Questions)
-*Goal: Extract tone fingerprint, slang vocabulary, how user addresses different relationship tiers*
+### 8 Scientifically Validated Evidence / Question Formats
 
-**Critical Feature:** User defines **named relationship tiers** and preferred addressing styles for EACH tier:
-- "What do you call your closest male friend when greeting them?" -> "bhai", "yaar", "bro", "bud"
-- "What do you call yourself when you want someone to address you? Any specific nickname?" -> "ok bhai", "K", "bhai"
-- "How do you start a message to someone you respect professionally?" -> "Hey", "Sir", "yo"
-- "How do you end a conversation with a best friend vs a colleague?"
+Instead of a flat Q&A or standard Likert scale, the onboarding engine uses **8 distinct evidence formats** designed to eliminate self-report bias, force trade-offs, extract priorities, and measure confidence:
 
-Sample questions:
+#### 1. Forced Choice MCQs (Validated constructs from BFI-2, IPIP, HEXACO)
+Presents concrete ethical or social dilemmas where every option corresponds to a distinct latent trait direction.
+*Example:* Someone shares confidential information with you.
+- **A.** Keep it private (`Agreeableness +1`, `Trust +2`)
+- **B.** Tell only my closest friend (`Boundary_Selective +2`)
+- **C.** Depends on who asks (`Machiavellian_Pragmatism +1`)
+- **D.** If it benefits me, I'd share it (`Honesty-Humility -2`)
 
-1. "Give me an example of something you said recently that you thought was funny. Don't explain why — just say it."
-2. "Do you use profanity/abusive language? In what contexts? Rate: 1=never, 10=every sentence"
-3. "What regional slang or insider vocabulary do you use that outsiders wouldn't understand?"
-4. "How do you disagree with someone you respect? Give me an actual example."
-5. "When texting your best friend about something exciting, what does that text look like? Type it out."
-6. "How do you want people close to you to address you? What names feel natural vs wrong?"
-7. "Do you match someone else's energy in conversation or maintain your own register?"
-8. "How long are your typical messages — one line or paragraphs? Does it depend on the person?"
-9. "What's your texting style when you're annoyed: (A) Radio silence / (B) Short clipped responses / (C) Longer than usual explaining / (D) Explosive and then fine"
-10. "Do you give compliments easily or reluctantly? Do you receive them gracefully or deflect?"
-11. "List 5 words or phrases you use constantly that are very 'you'. Don't think too hard."
-12. "How do you handle someone who talks too much in a meeting or group setting?"
-13. "Do you prefer written or verbal communication for serious topics? Why?"
-14. "Rate your sarcasm level 1-10. Give me a sample sarcastic line in your actual voice."
-15. "What's the fastest way to bore you in a conversation?"
-16. "How do you show that you care about someone — without explicitly saying 'I care about you'?"
-17. "When someone vents to you, what's your default mode: (A) Fix it / (B) Validate and listen / (C) Reframe with perspective / (D) Make them laugh out of it"
-18. "How do you apologize when you're wrong? Be specific — what do you actually say?"
-19. "What's your tone in a high-pressure situation — do you get quieter, louder, funnier, or colder?"
-20. "Describe your relationship with eye contact and silence in conversations."
-21. "Do you prefer direct questions or for people to read between the lines?"
-22. "How quickly do you trust new people? What makes someone cross from 'stranger' to 'person I'd call at 2am'?"
-23. "How differently do you talk to: (A) your parents / (B) your closest friend / (C) someone you're trying to impress / (D) someone junior to you?"
-24. "What's something people always misunderstand about how you communicate?"
-25. "Give me an example of your internal monologue when you're about to make a big decision. What does that voice sound like?"
+#### 2. Scenario-Based MCQs / Situational Judgment Tests (SJTs)
+Inspired by behavioral selection frameworks (Google, Microsoft, Military, Medical Schools) to test real-world conflict and execution reflexes.
+*Example:* Your teammate submits terrible work one day before the deadline. What do you do?
+- **A.** Redo it yourself (`Conscientiousness +2`, `Delegation -2`, `Anxiety +1`)
+- **B.** Tell them directly it's unacceptable (`Brutal_Honesty +3`, `Agreeableness -1`)
+- **C.** Inform your manager (`Institutional_Reliance +2`)
+- **D.** Submit it anyway (`Conscientiousness -3`, `Conflict_Avoidance +2`)
 
----
+#### 3. Ranking Questions (Priority Extraction)
+Eliminates "I want everything" by forcing strict ordinal ranking of competing values.
+*Example:* When choosing a project or career move, rank from most to least important: `[Salary, Impact, Freedom, Recognition, Learning]`.
+Extracts relative utility weights for decision advice.
 
-#### MODULE 3: DECISION-MAKING & COGNITIVE HEURISTICS (20 Questions)
-*Goal: Extract decision frameworks, risk tolerance, time orientation, cognitive biases*
+#### 4. Pairwise Choice (Bias Reduction)
+Reduces cognitive load and social desirability bias through direct head-to-head comparisons.
+*Example:* Which sounds more like you in a crisis?
+- **A.** "I prefer immediate certainty, even if incomplete."
+- **B.** "I comfortable navigating prolonged uncertainty until all facts emerge."
 
-1. "Walk me through the last decision you regret. What went wrong in the process — not the outcome, the process."
-2. "Are you more afraid of committing too early or waiting too long?"
-3. "How do you handle incomplete information? Do you wait for more data or act on what you have?"
-4. "What's your relationship with risk? Is it consistent across domains (money, relationships, career, health) or domain-specific?"
-5. "Do you optimize for reversibility (keeping options open) or commitment (burning ships)?"
-6. "When you have a gut feeling that contradicts the data — which wins? Give an example."
-7. "How many options do you want when making a decision? Do you narrow fast or want exhaustive choices?"
-8. "How long does it take you to move on from a decision you made? Do you revisit or do you file it and move?"
-9. "What's your relationship with deadlines — are they motivating, stressful, irrelevant, or energizing?"
-10. "Describe the physical sensation you get when you know something is right. Where do you feel certainty?"
-11. "How do you handle advice that contradicts your instincts?"
-12. "What cognitive bias do you think affects you most? (Give options: Confirmation bias / Sunk cost / FOMO / Overconfidence / Loss aversion / Availability heuristic)"
-13. "When you're stuck: do you think your way out, talk your way out, sleep on it, or work your way out?"
-14. "How do you feel about asking for help? Be honest about the internal resistance if there is any."
-15. "Do you make lists, use systems, or operate from your head?"
-16. "What's your time horizon when you think about your life? (Day / Week / Year / Decade)"
-17. "When things go wrong — is your first instinct to blame yourself, others, circumstances, or randomness?"
-18. "What's a shortcut or heuristic you use that saves you time but might be wrong sometimes?"
-19. "How do you know when to quit something vs when to push through?"
-20. "What does your ideal working environment look like — time of day, setting, alone or with people, music or silence?"
+#### 5. Memory Recall (Cognitive & Behavioral Memory Anchoring)
+Grounds traits in actual episodic memory rather than abstract self-assessment.
+*Example:* Instead of asking "Are you patient?", ask: *"Tell me about the last time someone wasted your time. What happened? How did you react in the room? How long did it take you to stop thinking about it afterwards?"*
+Extracts real recovery latency (`emotional_closure_speed`) and actual conflict behavior.
+
+#### 6. Prediction Questions (Self-Awareness & Blind Spot Mapping)
+Asks the user to predict how an external observer would rate them.
+*Example:* *"If your closest friend answered this questionnaire about your temper under stress, what option would they pick?"*
+Comparing self-rating vs. predicted external rating measures `self_awareness_gap` and blind spots.
+
+#### 7. Contradiction Detection (Internal Consistency & Drift Validation)
+Cross-checks asserted values against concrete scenario responses placed later in the flow.
+*Example:* Early item: *"I never compromise on truth."* Later SJT (Q81): *"Your mother asks if you like the food she spent 4 hours cooking, but it's overcooked."*
+If answers conflict, the engine does not reject either; instead, `confidence` on absolute honesty decreases while `situational_diplomacy` increases.
+
+#### 8. Confidence Questions (Metacognitive Data)
+Attached to high-stakes decisions and moral dilemmas: *"How confident are you that you would actually act this way in real life?"* `[100% | 80% | 60% | Guessing/Hopeful]`.
+Confidence itself becomes a multiplier on latent vector updates (`latent_update = raw_weight * confidence_factor`).
 
 ---
 
-#### MODULE 4: HUMOR, CREATIVITY & AESTHETIC DNA (15 Questions)
-*Goal: Capture humor register, creative style, aesthetic sensibility — critical for personality replication*
+### Latent Trait Multi-Update Schema
 
-1. "Tell me something genuinely funny. Not a joke — something that happened that you think is funny."
-2. "What kind of humor makes you actually laugh vs politely smile?"
-3. "What's your humor style: (A) Dry/deadpan / (B) Absurdist/surreal / (C) Sharp/roast-style / (D) Self-deprecating / (E) Observational / (F) Dark"
-4. "What do you find offensive about most comedy? Where's your actual line?"
-5. "What creative field (that isn't your main work) do you privately appreciate most — music, architecture, writing, visual art, cinema, game design, etc.?"
-6. "Name 3 creators, thinkers, or figures whose work has shaped how you see the world."
-7. "What's your aesthetic — in design, fashion, environment? Give me 3 concrete reference points."
-8. "How do you feel about people who take themselves too seriously?"
-9. "What's the last thing that made you genuinely laugh out loud?"
-10. "If someone described your humor style to a stranger, what would they say?"
-11. "Do you prefer references that are niche/obscure or widely understood?"
-12. "What topics are off-limits for humor in your world?"
-13. "How do you use humor in tension or conflict?"
-14. "What film, book, or song best captures your current emotional state or worldview?"
-15. "If your personality was a genre of music, what would it be and why?"
+Every answer does not simply store a string; it emits a **JSON Latent Trait Update Vector** that shifts multiple dimensions simultaneously across the user's `persona_dna` profile:
 
----
-
-#### MODULE 5: CONTINUOUS LEARNING SIGNALS (10 Questions, asked periodically not just at setup)
-*Goal: Keep persona updated as the user evolves — these are resurveyed every 30 days*
-
-1. "What changed for you in the last month that you didn't expect?"
-2. "What are you currently obsessed with — intellectually, creatively, professionally?"
-3. "Who have you been spending the most time with? How are they influencing you?"
-4. "What opinion have you changed recently?"
-5. "What's draining you right now that you haven't addressed?"
-6. "What's the one thing you keep telling yourself you'll do but haven't started?"
-7. "How is your relationship with yourself different from 6 months ago?"
-8. "What have you said no to recently that you're proud of?"
-9. "What do you want Atlas to notice that it's been missing about you?"
-10. "Is the persona Atlas shows you feeling accurate? What's off?"
+```json
+// Example answer payload for Scenario MCQ (Teammate bad work -> B: Tell directly)
+{
+  "question_id": "SJT_014",
+  "chosen_option": "B",
+  "confidence_rating": 0.80,
+  "latent_updates": {
+    "brutal_honesty": +3.0,
+    "agreeableness": -1.5,
+    "conflict_confrontation_speed": +2.5,
+    "leadership_directness": +2.0,
+    "decision_confidence": +1.0
+  }
+}
+```
 
 ---
 
-### Output Schema — persona_dna Table (SQLCipher)
+### Adaptive Questionnaire Organization (~200 Total Pool, ~100-120 Adaptive Path)
+
+The engine organizes ~200 items across 11 behavioral dimensions, dynamically pruning questions when high-confidence clusters emerge:
+
+| Module | Dimension | Pool Size | Adaptive Target | Core Constructs Extracted |
+|:---|:---|:---:|:---:|:---|
+| **M01** | **Identity & Core Values** | 25 | ~15 | OCEAN anchors, Enneagram fears, non-negotiables |
+| **M02** | **Decision Making & Risk** | 20 | ~12 | Risk tolerance, time horizon, System 1/2 heuristics |
+| **M03** | **Communication & Tone** | 25 | ~15 | Formality, length, hedging, directness vs. diplomacy |
+| **M04** | **Relationships & Addressing** | 25 | ~15 | Tiered addressing (`ok bhai`, `yaar`), attachment style |
+| **M05** | **Humor Profile** | 15 | ~8 | Dry, dark, absurd, self-deprecating, boundaries |
+| **M06** | **Morality & Ethics** | 20 | ~10 | Honesty-humility, ethical pragmatism, rule adherence |
+| **M07** | **Work Style & Execution** | 20 | ~12 | Procrastination triggers, focus endurance, delegation |
+| **M08** | **Creativity & Aesthetic DNA**| 15 | ~8 | Niche vs. broad taste, artistic influences, music/visual |
+| **M09** | **Emotional Regulation** | 20 | ~10 | Recovery latency, pressure shift, venting reaction |
+| **M10** | **Memory Recall Anchors** | 20 | ~10 | Verbatim stories of past conflict, triumph, and regret |
+| **M11** | **Contradiction Validation** | 15 | ~5 | Cross-checks on self-image vs. situational behavior |
+
+---
+
+### Multi-Source Persona Graph (Continuous Behavioral Evidence)
+
+Onboarding is only the initialization phase (`source = 'questionnaire'`). The true power of Atlas Identity OS comes from **continuous multi-source evidence fusion**, creating a living **Persona Graph** where observations continuously recalibrate trait confidence:
+
+1. **Questionnaire Evidence (`questionnaire`):** Baseline latent initialization from the 8 question formats.
+2. **Conversation Analysis (`behavioral_chat`):** Live monitoring of user messages to Atlas (LSM linguistic matching, vocabulary tier, hedging frequency, tone drift).
+3. **Writing Samples & Idiolect (`writing_sample`):** Parsing signature phrases, regional slang, syntax structure, and message length patterns across imported documents or notes.
+4. **Voice Diary & Acoustic Signals (`behavioral_voice`):** cpal audio capture transcribed via `whisper-small.onnx` — extracting speech rate (WPM), emotional valence, sigh/frustration markers, and unprompted candid reflections.
+5. **Decision History & Action Logs (`decision_log`):** Comparing what the user *said* they would do in a scenario vs. what they *actually* chose when Atlas presented options or tasks during daily workflow.
+6. **Git & Code Activity (`behavioral_git`):** Commit timestamps (2 AM night worker vs. morning disciplined), force-push iterations (perfectionism vs. rapid shipping), commit message tone.
+7. **Calendar & Habit Patterns (`calendar_habit`):** Meeting density handling, procrastination windows, deep focus block execution.
+
+---
+
+### Database Schema — Behavioral Evidence Engine (SQLCipher)
 
 ```sql
-CREATE TABLE persona_dna (
+-- Core Persona DNA Table (Stores normalized traits + confidence + source tracking)
+CREATE TABLE IF NOT EXISTS persona_dna (
     id TEXT PRIMARY KEY,
-    trait_category TEXT NOT NULL,  -- 'tone', 'slang', 'decision', 'humor', 'values', 'relationship', 'cognitive'
-    trait_key TEXT NOT NULL,       -- 'formality_level', 'sarcasm_score', 'gut_vs_data', 'humor_style'
-    trait_value TEXT NOT NULL,     -- Human readable extracted value
-    trait_score REAL,              -- Normalized 0.0-1.0 where applicable
-    ocean_dimension TEXT,          -- O/C/E/A/N if applicable
-    mbti_axis TEXT,                -- I/E, N/S, T/F, J/P if applicable
-    enneagram_type INTEGER,        -- 1-9 if applicable
-    confidence REAL DEFAULT 0.8,   -- How confident the extraction is
-    source TEXT DEFAULT 'questionnaire',  -- 'questionnaire' | 'behavioral' | 'inferred'
-    last_updated INTEGER           -- Unix timestamp
+    trait_category TEXT NOT NULL,    -- 'tone' | 'slang' | 'decision' | 'humor' | 'values' | 'relationship' | 'cognitive' | 'ocean_summary'
+    trait_key TEXT NOT NULL,         -- e.g. 'formality_level', 'sarcasm_score', 'gut_vs_data', 'humor_style', 'risk_tolerance'
+    trait_value TEXT NOT NULL,       -- human-readable extracted value or verbatim evidence summary
+    trait_score REAL,                -- normalized 0.0-1.0 or latent score
+    ocean_dimension TEXT,            -- 'O' | 'C' | 'E' | 'A' | 'N' if applicable
+    mbti_axis TEXT,                  -- 'I/E' | 'N/S' | 'T/F' | 'J/P' if applicable
+    enneagram_type INTEGER,          -- 1-9 if applicable
+    confidence REAL DEFAULT 0.8,     -- extraction confidence; dynamically updated across evidence sources
+    source TEXT DEFAULT 'questionnaire', -- 'questionnaire' | 'behavioral_voice' | 'behavioral_git' | 'behavioral_chat' | 'decision_log'
+    question_id TEXT,                -- which interview question or evidence event produced this row
+    superseded_by TEXT,              -- id of newer row replacing this one (Module 5 / continuous resurvey)
+    last_updated INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_persona_dna_category ON persona_dna(trait_category);
+CREATE INDEX IF NOT EXISTS idx_persona_dna_key ON persona_dna(trait_key);
+CREATE INDEX IF NOT EXISTS idx_persona_dna_current ON persona_dna(last_updated) WHERE superseded_by IS NULL;
+
+-- Relationship Addressing Table (Tiered custom addressing rules)
+CREATE TABLE IF NOT EXISTS relationship_addressing (
+    id TEXT PRIMARY KEY,
+    relationship_tier TEXT,          -- 'best_friend' | 'parent' | 'colleague' | 'junior' | 'romantic'
+    person_name TEXT,                -- specific person if named
+    how_i_address_them TEXT,         -- e.g. "yaar", "sir", "hey"
+    how_they_address_me TEXT,        -- e.g. "bhai", "K", "ok bhai"
+    greeting_style TEXT,             -- e.g. "Yo!", "Aye bhai!", "Hey"
+    sign_off_style TEXT,             -- e.g. "catch you later", "ight"
+    tone_shift TEXT,                 -- e.g. "10% more formal", "drop all filters"
+    last_updated INTEGER
+);
+CREATE INDEX IF NOT EXISTS idx_relationship_tier ON relationship_addressing(relationship_tier);
+
+-- Interview Responses Log (Preserves raw multi-format answers + latent vector updates)
+CREATE TABLE IF NOT EXISTS interview_responses (
+    id TEXT PRIMARY KEY,
+    question_id TEXT NOT NULL,
+    module INTEGER NOT NULL,
+    question_text TEXT NOT NULL,
+    raw_answer TEXT NOT NULL,
+    evidence_format TEXT NOT NULL DEFAULT 'open', -- 'mcq' | 'sjt' | 'ranking' | 'pairwise' | 'recall' | 'prediction' | 'open'
+    confidence_rating REAL DEFAULT 0.8,           -- user self-rated confidence (1.0, 0.8, 0.6, 0.3)
+    latent_updates_json TEXT,                     -- JSON block of multi-trait latent updates e.g. {"risk_tolerance": +2, "agreeableness": -1}
+    answered_at INTEGER NOT NULL
 );
 
-CREATE TABLE relationship_addressing (
+-- Continuous Behavioral Evidence Log (Logs multi-source drift & observations)
+CREATE TABLE IF NOT EXISTS behavioral_evidence_log (
     id TEXT PRIMARY KEY,
-    relationship_tier TEXT,       -- 'best_friend', 'parent', 'colleague', 'junior', 'romantic'
-    person_name TEXT,             -- Specific person if named
-    how_i_address_them TEXT,      -- "yaar", "sir", "hey"
-    how_they_address_me TEXT,     -- "bhai", "K", "ok bhai"
-    greeting_style TEXT,          -- "Yo!", "Aye bhai!", "Hey"
-    sign_off_style TEXT,          -- "catch you later", "ight"
-    tone_shift TEXT               -- "10% more formal", "drop all filters"
+    source_type TEXT NOT NULL,       -- 'conversation_analysis' | 'writing_sample' | 'journal_entry' | 'decision_history' | 'calendar_habit'
+    evidence_summary TEXT NOT NULL,
+    extracted_traits_json TEXT NOT NULL, -- JSON block of latent updates
+    confidence REAL NOT NULL,
+    observed_at INTEGER NOT NULL
 );
 ```
 
 ---
 ---
 
-# PROMPT 2: MIRROR PERSONA ENGINE — EXTRACTION, EMBEDDING & INTEGRATION
-## How Personality DNA Gets Into Every LLM Response + Memory Vector System
+# PROMPT 2: MIRROR PERSONA ENGINE — EVIDENCE FUSION & SYSTEM PROMPT COMPILATION
+## How Behavioral Evidence & Latent Traits Drive Real-Time LLM Monologue
 
 ---
 
-**Objective:** Design and implement the complete technical pipeline that takes the `persona_dna` profile from Prompt 1 and integrates it into every single interaction — LLM chat responses, Telegram push reminders, voice diary analysis, and behavioral feedback loops. The result must be that every response Atlas gives sounds indistinguishably like the user speaking to themselves.
+**Objective:** Design and implement the complete technical pipeline (`persona_engine.rs`) that takes the `persona_dna` latent profile, relationship addressing rules, and multi-source behavioral evidence from Prompt 1, and injects them into every single interaction — LLM chat responses, Telegram push reminders, voice diary analysis, and decision feedback loops. The result must be that every response Atlas gives sounds indistinguishably like the user's most self-aware, candid inner monologue.
 
 ---
 
 ### Research Directions — Search These Specifically
 
-**GitHub repos to find:**
+**GitHub repos & references to check:**
 - `persona-conditioned text generation`, `personalized dialogue systems`, `user-adaptive language model`
-- `MemGPT` — long-term memory management for LLMs (critical architecture reference)
+- `MemGPT` — long-term memory management and self-editing persona storage for LLMs
 - `LangChain persona prompt`, `personality injection system prompt`, `character.ai persona system`
-- `PersonaChat` (Facebook/Meta dataset), `Blenderbot persona`, `SPC (Speaker Persona Consistency)`
+- `BIG5-CHAT` repository and dataset (human-grounded behavioral dialogue training)
 - Search: `psychologically consistent LLM`, `identity-consistent language generation`, `behavioral digital twin`
 
-**Papers to find on arXiv / ACL / EMNLP:**
+**Academic Papers (arXiv / ACL / EMNLP / Nature):**
+- "BIG5-CHAT: Shaping LLM Personalities Through Training on Human-Grounded Data" (ACL 2025)
+- "PersonaLLM: Investigating the Ability of Large Language Models to Express Personality Traits" (NAACL 2024)
+- "A psychometric framework for evaluating and shaping personality traits in large language models" (Nature Machine Intelligence 2025)
+- "LMLPA: Language Model Linguistic Personality Assessment" (CL 2025)
 - "Revisiting the Persona Consistency in Dialogue Systems" (2023+)
-- "PersonalityEdit: Editing LLM Personality"
-- "Do LLMs Possess a Personality? Making the MBTI Evaluation Reasonable for LLMs"
-- "Character is Destiny: Large Language Model-Empowered Dialogue Agents for Role-playing"
-- "Faithful Persona-Based Conversational Dataset Generation with Large Language Models"
 
 ---
 
