@@ -19,6 +19,7 @@ export const ChatPanel: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState<string | null>(null);
+  const [toolSchema, setToolSchema] = useState<string>('');
   const [ollamaModel, setOllamaModel] = useState('llama3.1:8b');
   const [personaLoaded, setPersonaLoaded] = useState(false);
 
@@ -37,6 +38,12 @@ export const ChatPanel: React.FC = () => {
   // Load mirror persona system prompt + Telegram config on mount
   useEffect(() => {
     const init = async () => {
+      // Load tool schema for agentic OS control
+      try {
+        const schema: string = await invoke('get_tool_schema');
+        setToolSchema(schema);
+      } catch { /* tool schema not critical */ }
+
       // Load mirror persona system prompt from persona_engine
       try {
         const prompt: string = await invoke('get_mirror_system_prompt', { tier: 'self' });
@@ -120,41 +127,28 @@ export const ChatPanel: React.FC = () => {
       // 2. Retrieve top reranked memories (sqlite-vec KNN)
       const topMatches: Array<[string, number]> = await invoke('search_graph_vector', { query: userMsg, topK: 3 });
 
-      // 3. Build Ollama messages array
-      const messages: Array<{ role: string; content: string }> = [];
-
-      // Inject mirror persona system prompt if available
+      // 3. Build active system prompt (mirror persona or fallback)
       const activeSystemPrompt = systemPrompt ||
         `You are Atlas, a candid and direct digital assistant. Be concise, honest, and helpful. Never use generic AI filler phrases like "As an AI" or "Certainly!".`;
-      messages.push({ role: 'system', content: activeSystemPrompt });
 
-      // Inject relevant memories as context
-      if (topMatches.length > 0 && topMatches[0][1] > 0.35) {
-        const memCtx = topMatches
-          .filter(m => m[1] > 0.35)
-          .slice(0, 3)
-          .map(m => `Related memory: "${m[0]}" (similarity: ${(m[1] * 100).toFixed(0)}%)`)
-          .join('\n');
-        messages.push({ role: 'system', content: `RELEVANT CONTEXT FROM YOUR KNOWLEDGE GRAPH:\n${memCtx}` });
-      }
 
-      // Add user message
-      messages.push({ role: 'user', content: userMsg });
-
-      // 4. Call local Ollama
+      // 4. Call local Ollama with persona + tool schema in system prompt
       let responseText = '';
       try {
+        const fullSystemPrompt = (activeSystemPrompt + '\n\n' + toolSchema).trim();
         const ollamaRes = await fetch('http://localhost:11434/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: ollamaModel, messages, stream: false }),
+          body: JSON.stringify({ model: ollamaModel, messages: [
+            { role: 'system', content: fullSystemPrompt },
+            ...(topMatches.length > 0 && topMatches[0][1] > 0.35 ? [{ role: 'system', content: `RELEVANT CONTEXT:\n${topMatches.filter(m => m[1] > 0.35).slice(0, 3).map(m => `"${m[0]}" (${(m[1]*100).toFixed(0)}% match)`).join('\n')}` }] : []),
+            { role: 'user', content: userMsg },
+          ], stream: false }),
         });
-
         if (!ollamaRes.ok) throw new Error(`Ollama HTTP ${ollamaRes.status}`);
         const data = await ollamaRes.json();
         responseText = data?.message?.content || 'No response received from Ollama.';
-      } catch (ollamaErr: any) {
-        // Fallback: generate a smart mock response using memory context
+      } catch {
         if (topMatches.length > 0 && topMatches[0][1] > 0.4) {
           responseText = `Based on what you logged earlier about "${topMatches[0][0]}" (${(topMatches[0][1] * 100).toFixed(0)}% match) — looks like you're consistent. Keep going.`;
         } else {
@@ -162,16 +156,43 @@ export const ChatPanel: React.FC = () => {
         }
       }
 
-      // 5. Infer avatar state from response sentiment
-      const inferred = inferAvatarState(responseText, false, false);
+      // 5. Parse and execute agentic tool calls from response
+      const toolCallRegex = /<TOOL_CALL>(.*?)<\/TOOL_CALL>/gs;
+      const toolMatches = [...responseText.matchAll(toolCallRegex)];
+      let cleanResponse = responseText.replace(toolCallRegex, '').trim();
+
+      if (toolMatches.length > 0) {
+        for (const match of toolMatches) {
+          try {
+            const toolJson = JSON.parse(match[1].trim());
+            const result: { success: boolean; message: string; action_taken: string } = await invoke('execute_agentic_tool', {
+              tool: toolJson.tool,
+              params: toolJson.params || {},
+            });
+            setChatHistory(prev => [...prev, {
+              sender: 'atlas',
+              text: `⚡ ${result.message}`,
+              state: 'SPEAKING',
+              timestamp: Date.now(),
+            }]);
+          } catch (toolErr) {
+            console.error('Tool execution failed:', toolErr);
+          }
+        }
+      }
+
+      // 6. Infer avatar state from clean response
+      const inferred = inferAvatarState(cleanResponse || responseText, false, false);
       setAvatarState(inferred);
 
-      setChatHistory(prev => [...prev, {
-        sender: 'atlas',
-        text: responseText,
-        state: inferred,
-        timestamp: Date.now(),
-      }]);
+      if (cleanResponse.trim()) {
+        setChatHistory(prev => [...prev, {
+          sender: 'atlas',
+          text: cleanResponse,
+          state: inferred,
+          timestamp: Date.now(),
+        }]);
+      }
 
       setTimeout(() => setAvatarState('NEUTRAL'), 5000);
     } catch (err: any) {

@@ -1,4 +1,5 @@
 pub mod audio;
+pub mod agentic;
 pub mod embed;
 pub mod errors;
 pub mod graph;
@@ -197,6 +198,22 @@ async fn send_telegram_update(
     Ok(res)
 }
 
+// IPC Command: Execute an agentic OS tool call
+#[tauri::command]
+async fn execute_agentic_tool(
+    tool: String,
+    params: serde_json::Value,
+) -> Result<agentic::ToolResult, errors::AtlasError> {
+    let tool_call = agentic::ToolCall { tool, params };
+    agentic::execute_tool(&tool_call)
+}
+
+// IPC Command: Get full tool schema string to inject into Ollama system prompt
+#[tauri::command]
+async fn get_tool_schema() -> Result<String, errors::AtlasError> {
+    Ok(agentic::build_tool_schema_prompt())
+}
+
 // IPC Command: Save extracted onboarding profile and responses
 #[tauri::command]
 async fn save_onboarding_profile(
@@ -346,6 +363,8 @@ pub fn run() {
             send_telegram_update,
             save_onboarding_profile,
             get_mirror_system_prompt,
+            execute_agentic_tool,
+            get_tool_schema,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -29,6 +29,9 @@ pub enum AtlasError {
 
     #[error("Internal error: {0}")]
     Internal(String),
+
+    #[error("Agentic tool error: {0}")]
+    Agentic(String),
 }
 
 // Implement Serialize cleanly specifying std::result::Result to avoid alias conflict
