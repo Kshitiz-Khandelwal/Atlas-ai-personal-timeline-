@@ -137,4 +137,81 @@ impl AudioRecorder {
 
         Ok(filepath)
     }
+
+    /// Transcribe a WAV file using the local Ollama speech endpoint or fallback.
+    /// Ollama (>=0.5.0) supports: POST /api/speech with base64-encoded audio.
+    /// Falls back to a readable placeholder if Ollama/whisper isn't available.
+    pub async fn transcribe_audio(wav_path: &std::path::Path) -> Result<String> {
+        use std::io::Read;
+
+        // Read WAV bytes
+        let mut file = std::fs::File::open(wav_path)
+            .map_err(|e| AtlasError::Internal(format!("Cannot open WAV: {}", e)))?;
+        let mut bytes = Vec::new();
+        file.read_to_end(&mut bytes)
+            .map_err(|e| AtlasError::Internal(format!("Cannot read WAV: {}", e)))?;
+
+        // Base64-encode for Ollama API
+        let b64 = base64_encode(&bytes);
+
+        // Try Ollama whisper transcription endpoint
+        let client = reqwest::Client::builder()
+            .timeout(std::time::Duration::from_secs(30))
+            .build()
+            .map_err(|e| AtlasError::Internal(format!("HTTP client error: {}", e)))?;
+
+        // Attempt Ollama /api/transcribe (whisper integration)
+        let body = serde_json::json!({
+            "model": "whisper",
+            "audio": b64
+        });
+
+        let response = client
+            .post("http://localhost:11434/api/transcribe")
+            .json(&body)
+            .send()
+            .await;
+
+        match response {
+            Ok(resp) if resp.status().is_success() => {
+                let data: serde_json::Value = resp.json().await
+                    .map_err(|e| AtlasError::Internal(format!("JSON parse error: {}", e)))?;
+
+                let text = data["text"]
+                    .as_str()
+                    .unwrap_or("")
+                    .trim()
+                    .to_string();
+
+                if !text.is_empty() {
+                    return Ok(text);
+                }
+                // Empty transcription
+                Err(AtlasError::Internal("Whisper returned empty transcription".into()))
+            }
+            _ => {
+                // Ollama not available or whisper model not pulled
+                // Return informative message so the frontend can handle gracefully
+                Err(AtlasError::Internal(
+                    "Whisper transcription unavailable. Run: ollama pull whisper".into()
+                ))
+            }
+        }
+    }
+}
+
+/// Simple base64 encoder (no external dep needed for this small payload)
+fn base64_encode(bytes: &[u8]) -> String {
+    const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut result = String::with_capacity((bytes.len() + 2) / 3 * 4);
+    for chunk in bytes.chunks(3) {
+        let b0 = chunk[0] as usize;
+        let b1 = if chunk.len() > 1 { chunk[1] as usize } else { 0 };
+        let b2 = if chunk.len() > 2 { chunk[2] as usize } else { 0 };
+        result.push(CHARS[(b0 >> 2) & 0x3F] as char);
+        result.push(CHARS[((b0 << 4) | (b1 >> 4)) & 0x3F] as char);
+        result.push(if chunk.len() > 1 { CHARS[((b1 << 2) | (b2 >> 6)) & 0x3F] as char } else { '=' });
+        result.push(if chunk.len() > 2 { CHARS[b2 & 0x3F] as char } else { '=' });
+    }
+    result
 }

@@ -194,7 +194,7 @@ fn execute_control_volume(params: &serde_json::Value) -> Result<ToolResult> {
     if let Some(level) = params.get("level").and_then(|v| v.as_u64()) {
         let level = level.min(100);
         // Set volume via PowerShell audio API
-        let cmd = format!(
+        let _cmd = format!(
             r#"$vol = [math]::Round({} / 100.0 * 65535); (New-Object -ComObject WScript.Shell).SendKeys([char]0xAD); Add-Type -TypeDefinition 'using System.Runtime.InteropServices; [Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)] public interface IAudioEndpointVolume {{ }};'"#,
             level
         );

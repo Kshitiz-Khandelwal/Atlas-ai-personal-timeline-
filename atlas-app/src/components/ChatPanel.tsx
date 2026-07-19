@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { AvatarFace, AvatarState } from './AvatarFace';
 import { inferAvatarState } from '../utils/inferAvatarState';
+import { VoiceBar } from './VoiceBar';
 
 interface ChatMessage {
   sender: 'user' | 'atlas';
@@ -17,7 +18,6 @@ export const ChatPanel: React.FC = () => {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState<string | null>(null);
   const [toolSchema, setToolSchema] = useState<string>('');
   const [ollamaModel, setOllamaModel] = useState('llama3.1:8b');
@@ -76,41 +76,63 @@ export const ChatPanel: React.FC = () => {
     init();
   }, []);
 
-  // Voice recording toggle
-  const toggleRecording = async () => {
-    if (!isRecording) {
-      setIsRecording(true);
-      setAvatarState('LISTENING');
+
+  // Phase 4: Transcription result → inject directly into chat pipeline
+  const handleVoiceTranscribed = async (text: string) => {
+    if (!text.trim()) return;
+    // Show transcribed text as user message
+    setChatHistory(prev => [...prev, { sender: 'user', text: `🎙️ ${text}`, timestamp: Date.now() }]);
+    // Feed into the persona+tool pipeline (same as typed message)
+    setIsGenerating(true);
+    setAvatarState('THINKING');
+    try {
+      const nodeId = `voice_${Date.now()}`;
+      await invoke('embed_and_store', { nodeId, text });
+      const topMatches: Array<[string, number]> = await invoke('search_graph_vector', { query: text, topK: 3 });
+      const activeSystemPrompt = systemPrompt ||
+        `You are Atlas, a candid and direct digital assistant. Be concise, honest, and helpful. Never use generic AI filler phrases like "As an AI" or "Certainly!".`;
+      const fullSystemPrompt = (activeSystemPrompt + '\n\n' + toolSchema).trim();
+      let responseText = '';
       try {
-        await invoke('start_voice_recording');
-      } catch (err) {
-        console.error('Failed to start voice recording:', err);
-        setIsRecording(false);
-        setAvatarState('NEUTRAL');
+        const ollamaRes = await fetch('http://localhost:11434/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: ollamaModel, messages: [
+            { role: 'system', content: fullSystemPrompt },
+            ...(topMatches.length > 0 && topMatches[0][1] > 0.35 ? [{ role: 'system', content: `RELEVANT CONTEXT:\n${topMatches.filter(m => m[1] > 0.35).slice(0, 3).map(m => `"${m[0]}" (${(m[1]*100).toFixed(0)}% match)`).join('\n')}` }] : []),
+            { role: 'user', content: text },
+          ], stream: false }),
+        });
+        if (ollamaRes.ok) {
+          const data = await ollamaRes.json();
+          responseText = data?.message?.content || '';
+        }
+      } catch { /* ollama not running */ }
+      if (!responseText) responseText = `Voice indexed as '${nodeId}'. Ollama not running — start it with: ollama serve`;
+      // Parse tool calls
+      const toolCallRegex = /<TOOL_CALL>(.*?)<\/TOOL_CALL>/gs;
+      const toolMatches = [...responseText.matchAll(toolCallRegex)];
+      const cleanResponse = responseText.replace(toolCallRegex, '').trim();
+      for (const match of toolMatches) {
+        try {
+          const toolJson = JSON.parse(match[1].trim());
+          const result: { success: boolean; message: string; action_taken: string } = await invoke('execute_agentic_tool', { tool: toolJson.tool, params: toolJson.params || {} });
+          setChatHistory(prev => [...prev, { sender: 'atlas', text: `⚡ ${result.message}`, state: 'SPEAKING', timestamp: Date.now() }]);
+        } catch { /* tool error */ }
       }
-    } else {
-      setIsRecording(false);
-      setAvatarState('THINKING');
-      try {
-        const wavPath: string = await invoke('stop_voice_recording');
-        setTimeout(() => {
-          const text = `🎙️ Voice Diary Captured (${wavPath.split('\\').pop()})`;
-          const inferred = inferAvatarState(text, false, false);
-          setChatHistory(prev => [...prev,
-            { sender: 'user', text, timestamp: Date.now() },
-            { sender: 'atlas', text: "Indexed into your local audio timeline and embedded via ONNX vector engine.", state: inferred, timestamp: Date.now() }
-          ]);
-          setAvatarState(inferred);
-          setTimeout(() => setAvatarState('NEUTRAL'), 4000);
-        }, 1000);
-      } catch (err: any) {
-        setAvatarState('NEUTRAL');
-        alert("Audio error: " + (typeof err === 'string' ? err : JSON.stringify(err)));
-      }
+      const inferred = inferAvatarState(cleanResponse || responseText, false, false);
+      setAvatarState(inferred);
+      if (cleanResponse.trim()) setChatHistory(prev => [...prev, { sender: 'atlas', text: cleanResponse, state: inferred, timestamp: Date.now() }]);
+      setTimeout(() => setAvatarState('NEUTRAL'), 5000);
+    } catch (err: any) {
+      setChatHistory(prev => [...prev, { sender: 'atlas', text: `Error: ${typeof err === 'string' ? err : JSON.stringify(err)}`, state: 'NEUTRAL', timestamp: Date.now() }]);
+      setAvatarState('NEUTRAL');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  // Main chat handler — Phase 2: persona-injected + Ollama + inferAvatarState
+  // Main chat handler — Phase 2+3: persona-injected + Ollama + tool calls
   const handleSendChat = async () => {
     if (!inputMessage.trim() || isGenerating) return;
     const userMsg = inputMessage.trim();
@@ -295,13 +317,18 @@ export const ChatPanel: React.FC = () => {
             disabled={isGenerating}
             style={S.chatInput}
           />
-          <button onClick={toggleRecording} style={{ ...S.iconBtn, backgroundColor: isRecording ? '#ef4444' : '#10b981' }}>
-            {isRecording ? '⏹️' : '🎙️'}
-          </button>
           <button onClick={handleSendChat} disabled={isGenerating || !inputMessage.trim()} style={S.sendBtn}>
             Send
           </button>
         </div>
+
+        {/* Phase 4: VoiceBar — push-to-talk with auto transcription */}
+        <VoiceBar
+          onTranscribed={handleVoiceTranscribed}
+          onRecordingStart={() => setAvatarState('LISTENING')}
+          onRecordingStop={() => setAvatarState('THINKING')}
+          disabled={isGenerating}
+        />
       </div>
 
       {/* Telegram */}

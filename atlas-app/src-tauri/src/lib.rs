@@ -165,6 +165,24 @@ async fn stop_voice_recording(
     Ok(path.to_string_lossy().to_string())
 }
 
+// IPC Command: Transcribe an existing WAV file via local Ollama/Whisper
+#[tauri::command]
+async fn transcribe_recording(
+    wav_path: String,
+) -> Result<String, errors::AtlasError> {
+    let path = std::path::Path::new(&wav_path);
+    audio::AudioRecorder::transcribe_audio(path).await
+}
+
+// IPC Command: Stop recording AND immediately transcribe (single-call convenience)
+#[tauri::command]
+async fn stop_and_transcribe(
+    recorder: State<'_, Arc<AudioRecorder>>,
+) -> Result<String, errors::AtlasError> {
+    let wav_path = recorder.stop_recording().await?;
+    audio::AudioRecorder::transcribe_audio(&wav_path).await
+}
+
 // IPC Command: Save Telegram configuration
 #[tauri::command]
 async fn save_telegram_config(
@@ -358,6 +376,8 @@ pub fn run() {
             get_node_network,
             start_voice_recording,
             stop_voice_recording,
+            transcribe_recording,
+            stop_and_transcribe,
             save_telegram_config,
             get_telegram_config,
             send_telegram_update,
