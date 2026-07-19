@@ -3,11 +3,15 @@
 :root {
   --color-bg-base: hsl(240, 10%, 4%);
   --color-bg-surface: hsl(240, 10%, 8%);
+  --color-bg-glass: rgba(20, 20, 28, 0.75);
   --color-bg-overlay: hsla(240, 10%, 12%, 0.7);
   --color-border-subtle: hsl(240, 6%, 15%);
+  --color-border-glow: rgba(125, 211, 252, 0.25);
   --color-text-primary: hsl(0, 0%, 95%);
   --color-text-secondary: hsl(240, 4%, 65%);
   --color-accent-blue: hsl(215, 80%, 55%);
+  --color-accent-cyan: hsl(199, 89%, 60%);
+  --color-accent-purple: hsl(258, 90%, 66%);
   --color-confidence-high: hsl(142, 60%, 45%);
   --color-confidence-medium: hsl(37, 75%, 50%);
   --color-confidence-low: hsl(0, 70%, 50%);
@@ -32,6 +36,10 @@
 
 body {
   background-color: var(--color-bg-base);
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(167, 139, 250, 0.05) 0%, transparent 40%);
+  background-attachment: fixed;
   color: var(--color-text-primary);
   font-family: var(--font-body);
   overflow: hidden;
@@ -49,32 +57,88 @@ button {
   background: var(--color-accent-blue);
   color: white;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 500;
-  transition: opacity 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 button:hover {
-  opacity: 0.9;
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
 }
 
 button:disabled {
   background: var(--color-border-subtle);
   color: var(--color-text-secondary);
   cursor: not-allowed;
+  transform: none;
 }
 
-input[type="password"], input[type="text"] {
+input[type="password"], input[type="text"], select {
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-subtle);
   color: var(--color-text-primary);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 6px;
+  border-radius: 8px;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
   width: 100%;
 }
 
-input:focus {
-  border-color: var(--color-accent-blue);
+input:focus, select:focus {
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+}
+
+/* Glassmorphism utility classes */
+.glass-card {
+  background: var(--color-bg-glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--color-border-glow);
+  box-shadow: 0 12px 40px rgba(56, 189, 248, 0.08);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.98); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }

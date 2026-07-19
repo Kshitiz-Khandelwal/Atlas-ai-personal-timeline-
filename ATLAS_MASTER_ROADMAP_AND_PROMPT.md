@@ -9,9 +9,9 @@
 |---|---|---|---|
 | Phase 1: Adaptive Onboarding | ✅ **COMPLETE** | `9bf7ac8` | 21-question MCQ `PersonalityCloner.tsx`, live OCEAN/MBTI bars, `save_onboarding_profile` IPC, SQLCipher persistence |
 | Phase 2: Mirror Persona Chat | ✅ **COMPLETE** | `114f0ba` | `get_mirror_system_prompt` IPC wired to `ChatPanel.tsx`, Ollama integration, hybrid memory reranking, `inferAvatarState` sentiment-driven avatar |
-| Phase 3: Agentic OS Control | 🚀 **IN PROGRESS** | started `2026-07-19` | `agentic.rs` tool engine complete — play_music, launch_app, open_folder, control_volume, run_command, search_web. ChatPanel tool-call parsing next. |
-| Phase 4: Local Voice + Whisper | ⏳ Planned | — | `cpal` push-to-talk hotkey, local Whisper transcription → chat pipeline |
-| Phase 5: Glassmorphism Polish | ⏳ Planned | — | Premium UI, micro-animations, first-run showcase demo flow |
+| Phase 3: Agentic OS Control | ✅ **COMPLETE** | `63031df` | `agentic.rs` — play_music, launch_app, open_folder, control_volume, run_command, search_web. `<TOOL_CALL>` parsing in ChatPanel. Tool schema injected into Ollama system prompt. |
+| Phase 4: Local Voice + Whisper | ✅ **COMPLETE** | `2977484` | Global hotkey push-to-talk `VoiceBar.tsx`, `cpal` recording, `/api/transcribe` local Ollama Whisper pipeline |
+| Phase 5: Glassmorphism Polish | ✅ **COMPLETE** | `pending_commit` | Premium UI, micro-animations, first-run showcase demo flow (`FirstRunShowcase.tsx`) |
 
 ---
 

@@ -8,15 +8,18 @@ import { TimelineView } from './components/TimelineView';
 import { NetworkGraph } from './components/NetworkGraph';
 import { SettingsPage } from './components/SettingsPage';
 import { PersonalityCloner } from './components/PersonalityCloner';
+import { FirstRunShowcase } from './components/FirstRunShowcase';
 import './App.css';
+
+export type ActiveTab = 'SHOWCASE' | 'CLONE' | 'CHAT' | 'TIMELINE' | 'GRAPH' | 'SETTINGS' | 'ENGINES';
 
 export const App: React.FC = () => {
   const [vaultExists, setVaultExists] = useState<boolean | null>(null);
   const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'CLONE' | 'CHAT' | 'TIMELINE' | 'GRAPH' | 'SETTINGS' | 'ENGINES'>('CLONE');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('SHOWCASE');
 
-  // Phase 2 UI States
+  // Phase 2/4/5 UI States for ENGINES test tab
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [recordingPath, setRecordingPath] = useState<string | null>(null);
   const [observedFiles, setObservedFiles] = useState<string[]>([]);
@@ -114,7 +117,7 @@ export const App: React.FC = () => {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.spinner} />
-        <p style={styles.loadingText}>Loading Atlas Core Engine...</p>
+        <p style={styles.loadingText}>Loading Atlas Identity OS Engine...</p>
       </div>
     );
   }
@@ -127,106 +130,39 @@ export const App: React.FC = () => {
     return <UnlockPage onUnlocked={() => setIsUnlocked(true)} onReset={() => setVaultExists(false)} />;
   }
 
+  const navItems: Array<{ id: ActiveTab; label: string }> = [
+    { id: 'SHOWCASE', label: '🚀 Demo Showcase' },
+    { id: 'CLONE', label: '🧬 Persona Clone' },
+    { id: 'CHAT', label: '✨ Mirror Chat' },
+    { id: 'TIMELINE', label: '⏳ Timeline' },
+    { id: 'GRAPH', label: '🕸️ Network Graph' },
+    { id: 'ENGINES', label: '🛠️ Core Engines' },
+    { id: 'SETTINGS', label: '⚙️ Settings' },
+  ];
+
   return (
     <div style={styles.appContainer}>
       <header style={styles.header}>
         <div style={styles.logoContainer}>
           <div style={styles.avatarMini} />
-          <span style={styles.logoText}>Atlas identity OS</span>
-          <span style={styles.phaseBadge}>Phase 5 Active</span>
+          <span style={styles.logoText}>Atlas Identity OS</span>
+          <span style={styles.phaseBadge}>v0.5 Glassmorphic</span>
         </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <div style={{ display: 'flex', backgroundColor: 'var(--color-bg-base)', padding: 4, borderRadius: 8, border: '1px solid var(--color-border-subtle)' }}>
-            <button
-              onClick={() => setActiveTab('CLONE')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: 'none',
-                backgroundColor: activeTab === 'CLONE' ? 'var(--color-accent-blue)' : 'transparent',
-                color: activeTab === 'CLONE' ? '#fff' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 12
-              }}
-            >
-              🧬 Persona Clone
-            </button>
-            <button
-              onClick={() => setActiveTab('CHAT')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: 'none',
-                backgroundColor: activeTab === 'CHAT' ? 'var(--color-accent-blue)' : 'transparent',
-                color: activeTab === 'CHAT' ? '#fff' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 12
-              }}
-            >
-              ✨ Avatar & Chat
-            </button>
-            <button
-              onClick={() => setActiveTab('TIMELINE')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: 'none',
-                backgroundColor: activeTab === 'TIMELINE' ? 'var(--color-accent-blue)' : 'transparent',
-                color: activeTab === 'TIMELINE' ? '#fff' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 12
-              }}
-            >
-              ⏳ Timeline
-            </button>
-            <button
-              onClick={() => setActiveTab('GRAPH')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: 'none',
-                backgroundColor: activeTab === 'GRAPH' ? 'var(--color-accent-blue)' : 'transparent',
-                color: activeTab === 'GRAPH' ? '#fff' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 12
-              }}
-            >
-              🕸️ Network
-            </button>
-            <button
-              onClick={() => setActiveTab('SETTINGS')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: 'none',
-                backgroundColor: activeTab === 'SETTINGS' ? 'var(--color-accent-blue)' : 'transparent',
-                color: activeTab === 'SETTINGS' ? '#fff' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 12
-              }}
-            >
-              ⚙️ Settings
-            </button>
-            <button
-              onClick={() => setActiveTab('ENGINES')}
-              style={{
-                padding: '6px 12px',
-                borderRadius: 6,
-                border: 'none',
-                backgroundColor: activeTab === 'ENGINES' ? 'var(--color-accent-blue)' : 'transparent',
-                color: activeTab === 'ENGINES' ? '#fff' : 'var(--color-text-secondary)',
-                cursor: 'pointer',
-                fontWeight: 600,
-                fontSize: 12
-              }}
-            >
-              🛠️ Engines
-            </button>
+        
+        <div style={styles.navBar}>
+          <div style={styles.navTabsGroup}>
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  ...styles.navBtn,
+                  ...(activeTab === item.id ? styles.navBtnActive : {}),
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
           <button
             style={styles.lockButton}
@@ -235,13 +171,15 @@ export const App: React.FC = () => {
               setIsUnlocked(false);
             }}
           >
-            Lock Vault
+            🔒 Lock Vault
           </button>
         </div>
       </header>
 
       <main style={styles.mainContent}>
-        {activeTab === 'CLONE' ? (
+        {activeTab === 'SHOWCASE' ? (
+          <FirstRunShowcase onNavigateTab={(tab) => setActiveTab(tab)} />
+        ) : activeTab === 'CLONE' ? (
           <PersonalityCloner />
         ) : activeTab === 'CHAT' ? (
           <ChatPanel />
@@ -254,84 +192,84 @@ export const App: React.FC = () => {
         ) : (
           <div style={styles.gridContainer}>
           
-          {/* Card 1: Voice Diary Capture */}
-          <div style={styles.card}>
-            <h3 style={styles.cardTitle}>Voice Diary Capture (`cpal`)</h3>
-            <p style={styles.cardDesc}>Record raw microphone PCM audio to local 16kHz WAV format.</p>
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-              {!isRecording ? (
-                <button style={styles.recordBtn} onClick={handleStartRecording}>
-                  Start Recording
-                </button>
-              ) : (
-                <button style={styles.stopBtn} onClick={handleStopRecording}>
-                  Stop & Save WAV
-                </button>
+            {/* Card 1: Voice Diary Capture */}
+            <div className="glass-card" style={styles.card}>
+              <h3 style={styles.cardTitle}>Voice Diary Capture (`cpal`)</h3>
+              <p style={styles.cardDesc}>Record raw microphone PCM audio to local 16kHz WAV format.</p>
+              <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+                {!isRecording ? (
+                  <button style={styles.recordBtn} onClick={handleStartRecording}>
+                    🎙️ Start Recording
+                  </button>
+                ) : (
+                  <button style={styles.stopBtn} onClick={handleStopRecording}>
+                    ⏹ Stop & Save WAV
+                  </button>
+                )}
+              </div>
+              {recordingPath && (
+                <div style={styles.pathBox}>
+                  Saved locally: <code>{recordingPath}</code>
+                </div>
               )}
             </div>
-            {recordingPath && (
-              <div style={styles.pathBox}>
-                Saved locally: <code>{recordingPath}</code>
+
+            {/* Card 2: Vector Search (`sqlite-vec` + `ort`) */}
+            <div className="glass-card" style={styles.card}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={styles.cardTitle}>Vector Graph Search (`sqlite-vec`)</h3>
+                <button
+                  style={{ ...styles.lockButton, borderColor: 'var(--color-accent-cyan)', color: 'var(--color-accent-cyan)' }}
+                  onClick={async () => {
+                    setEmbedResult('Downloading/Loading bge-small-en-v1.5.onnx (~133MB)... please wait...');
+                    try {
+                      const msg: string = await invoke('load_embedding_model');
+                      setEmbedResult(msg);
+                    } catch (err: any) {
+                      setEmbedResult('Error loading model: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
+                    }
+                  }}
+                >
+                  📥 Load ONNX Model
+                </button>
               </div>
-            )}
-          </div>
-
-          {/* Card 2: Vector Search (`sqlite-vec` + `ort`) */}
-          <div style={styles.card}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={styles.cardTitle}>Vector Graph Search (`sqlite-vec`)</h3>
-              <button
-                style={{ ...styles.lockButton, borderColor: 'var(--color-accent-blue)', color: 'var(--color-accent-blue)' }}
-                onClick={async () => {
-                  setEmbedResult('Downloading/Loading bge-small-en-v1.5.onnx (~133MB)... please wait...');
-                  try {
-                    const msg: string = await invoke('load_embedding_model');
-                    setEmbedResult(msg);
-                  } catch (err: any) {
-                    setEmbedResult('Error loading model: ' + (typeof err === 'string' ? err : JSON.stringify(err)));
-                  }
-                }}
-              >
-                Download & Load Model
-              </button>
-            </div>
-            <p style={styles.cardDesc}>Embed text via local ONNX and query top-K nearest neighbors.</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <input
-                type="text"
-                placeholder="Enter thought or memory..."
-                value={embedText}
-                onChange={(e) => setEmbedText(e.target.value)}
-                style={{ flex: 1, padding: '8px 12px', borderRadius: 6, border: '1px solid var(--color-border-subtle)', backgroundColor: 'var(--color-bg-base)', color: 'var(--color-text-primary)' }}
-              />
-              <button style={{ padding: '8px 16px', borderRadius: 6, backgroundColor: 'var(--color-accent-blue)', color: '#fff', border: 'none', cursor: 'pointer' }} onClick={handleEmbedAndSearch}>Embed & Store</button>
-            </div>
-            {embedResult && <div style={styles.pathBox}>{embedResult}</div>}
-          </div>
-
-          {/* Card 3: Filesystem Watcher (`notify`) */}
-          <div style={styles.cardFull}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={styles.cardTitle}>Filesystem Watcher (`notify`)</h3>
-                <p style={styles.cardDesc}>Monitoring directory: <code>~/Atlas-Observed/</code> for new .md, .txt, .pdf drops.</p>
+              <p style={styles.cardDesc}>Embed text via local ONNX and query top-K nearest neighbors.</p>
+              <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+                <input
+                  type="text"
+                  placeholder="Enter thought or memory..."
+                  value={embedText}
+                  onChange={(e) => setEmbedText(e.target.value)}
+                  style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--color-border-subtle)', backgroundColor: 'rgba(0,0,0,0.3)', color: 'var(--color-text-primary)' }}
+                />
+                <button style={{ padding: '8px 16px', borderRadius: 8, background: 'linear-gradient(135deg, #38bdf8, #818cf8)', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 600 }} onClick={handleEmbedAndSearch}>Embed & Search</button>
               </div>
-              <span style={styles.liveDot} />
+              {embedResult && <div style={styles.pathBox}>{embedResult}</div>}
             </div>
-            <div style={styles.fileList}>
-              {observedFiles.length === 0 ? (
-                <span style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>No recent files observed... Drop any .md file in your Atlas-Observed folder to test!</span>
-              ) : (
-                observedFiles.map((file, i) => (
-                  <div key={i} style={styles.fileItem}>
-                    📄 <code>{file}</code>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
 
-        </div>
+            {/* Card 3: Filesystem Watcher (`notify`) */}
+            <div className="glass-card" style={styles.cardFull}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={styles.cardTitle}>Filesystem Watcher (`notify`)</h3>
+                  <p style={styles.cardDesc}>Monitoring directory: <code>~/Atlas-Observed/</code> for new .md, .txt, .pdf drops.</p>
+                </div>
+                <span style={styles.liveDot} />
+              </div>
+              <div style={styles.fileList}>
+                {observedFiles.length === 0 ? (
+                  <span style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>No recent files observed... Drop any .md file in your Atlas-Observed folder to test!</span>
+                ) : (
+                  observedFiles.map((file, i) => (
+                    <div key={i} style={styles.fileItem}>
+                      📄 <code>{file}</code>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+          </div>
         )}
       </main>
     </div>
@@ -350,14 +288,19 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 'var(--spacing-md)',
   },
   spinner: {
-    width: 24,
-    height: 24,
-    border: '2px solid var(--color-border-subtle)',
-    borderTopColor: 'var(--color-accent-blue)',
+    width: 28,
+    height: 28,
+    border: '3px solid var(--color-border-subtle)',
+    borderTopColor: 'var(--color-accent-cyan)',
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
   },
-  dashboard: {
+  loadingText: {
+    fontFamily: 'var(--font-display)',
+    fontSize: 15,
+    color: 'var(--color-text-secondary)',
+  },
+  appContainer: {
     display: 'flex',
     flexDirection: 'column',
     height: '100vh',
@@ -366,47 +309,87 @@ const styles: Record<string, React.CSSProperties> = {
     overflowY: 'auto',
   },
   header: {
-    height: 56,
-    borderBottom: '1px solid var(--color-border-subtle)',
+    height: 64,
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '0 var(--spacing-lg)',
-    backgroundColor: 'var(--color-bg-surface)',
-    flexShrink: 0,
+    backgroundColor: 'rgba(16, 16, 22, 0.8)',
+    backdropFilter: 'blur(20px)',
+    position: 'sticky',
+    top: 0,
+    zIndex: 100,
   },
   logoContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: 'var(--spacing-sm)',
+    gap: 10,
   },
   avatarMini: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     borderRadius: '50%',
-    backgroundColor: 'var(--color-accent-blue)',
+    background: 'linear-gradient(135deg, #38bdf8, #a78bfa)',
+    boxShadow: '0 0 12px rgba(56, 189, 248, 0.4)',
   },
   logoText: {
     fontFamily: 'var(--font-display)',
-    fontWeight: 600,
-    fontSize: 16,
-    color: 'var(--color-text-primary)',
+    fontWeight: 700,
+    fontSize: 18,
+    background: 'linear-gradient(90deg, #ffffff, #38bdf8)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
   },
   phaseBadge: {
     fontSize: 11,
     fontWeight: 600,
-    backgroundColor: 'rgba(59, 130, 246, 0.2)',
-    color: 'var(--color-accent-blue)',
-    padding: '2px 8px',
-    borderRadius: 12,
-    marginLeft: 8,
+    background: 'rgba(56, 189, 248, 0.15)',
+    color: '#38bdf8',
+    padding: '3px 10px',
+    borderRadius: 14,
+    border: '1px solid rgba(56, 189, 248, 0.3)',
+    marginLeft: 6,
+  },
+  navBar: {
+    display: 'flex',
+    gap: 14,
+    alignItems: 'center',
+  },
+  navTabsGroup: {
+    display: 'flex',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 4,
+    borderRadius: 10,
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+  },
+  navBtn: {
+    padding: '7px 13px',
+    borderRadius: 7,
+    border: 'none',
+    backgroundColor: 'transparent',
+    color: 'var(--color-text-secondary)',
+    cursor: 'pointer',
+    fontWeight: 600,
+    fontSize: 12,
+    transition: 'all 0.15s ease',
+  },
+  navBtnActive: {
+    background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(167, 139, 250, 0.2))',
+    color: '#fff',
+    border: '1px solid rgba(56, 189, 248, 0.4)',
+    boxShadow: '0 2px 10px rgba(56, 189, 248, 0.15)',
   },
   lockButton: {
-    backgroundColor: 'transparent',
-    border: '1px solid var(--color-border-subtle)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     color: 'var(--color-text-secondary)',
     fontSize: 12,
-    padding: '6px 12px',
+    fontWeight: 600,
+    padding: '7px 14px',
+    borderRadius: 8,
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
   },
   mainContent: {
     flex: 1,
@@ -423,48 +406,53 @@ const styles: Record<string, React.CSSProperties> = {
     alignContent: 'start',
   },
   card: {
-    backgroundColor: 'var(--color-bg-surface)',
-    border: '1px solid var(--color-border-subtle)',
-    borderRadius: 12,
     padding: 'var(--spacing-lg)',
     display: 'flex',
     flexDirection: 'column',
   },
   cardFull: {
     gridColumn: 'span 2',
-    backgroundColor: 'var(--color-bg-surface)',
-    border: '1px solid var(--color-border-subtle)',
-    borderRadius: 12,
     padding: 'var(--spacing-lg)',
     display: 'flex',
     flexDirection: 'column',
   },
   cardTitle: {
     fontFamily: 'var(--font-display)',
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 600,
-    color: 'var(--color-text-primary)',
+    color: '#fff',
   },
   cardDesc: {
     color: 'var(--color-text-secondary)',
     fontSize: 13,
-    marginTop: 4,
+    marginTop: 6,
+    lineHeight: 1.4,
   },
   recordBtn: {
-    backgroundColor: 'hsl(142, 60%, 45%)',
+    background: 'linear-gradient(135deg, #10b981, #059669)',
+    color: '#fff',
+    padding: '9px 18px',
+    borderRadius: 8,
+    fontWeight: 600,
+    border: 'none',
   },
   stopBtn: {
-    backgroundColor: 'hsl(0, 70%, 50%)',
+    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+    color: '#fff',
+    padding: '9px 18px',
+    borderRadius: 8,
+    fontWeight: 600,
+    border: 'none',
     animation: 'pulse 1.5s infinite',
   },
   pathBox: {
     marginTop: 16,
-    padding: 10,
-    backgroundColor: 'var(--color-bg-base)',
-    border: '1px solid var(--color-border-subtle)',
-    borderRadius: 6,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    border: '1px solid rgba(56, 189, 248, 0.2)',
+    borderRadius: 8,
     fontSize: 12,
-    color: 'var(--color-accent-blue)',
+    color: '#38bdf8',
     fontFamily: 'var(--font-mono)',
     wordBreak: 'break-all',
   },
@@ -475,18 +463,19 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 8,
   },
   fileItem: {
-    padding: '8px 12px',
-    backgroundColor: 'var(--color-bg-base)',
-    borderRadius: 6,
+    padding: '10px 14px',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 8,
     fontSize: 13,
     fontFamily: 'var(--font-mono)',
-    border: '1px solid var(--color-border-subtle)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
   },
   liveDot: {
     width: 10,
     height: 10,
     borderRadius: '50%',
-    backgroundColor: 'hsl(142, 60%, 45%)',
+    backgroundColor: '#10b981',
+    boxShadow: '0 0 10px #10b981',
   },
 };
 
