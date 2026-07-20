@@ -147,24 +147,48 @@ export const FirstRunShowcase: React.FC<FirstRunShowcaseProps> = ({ onNavigateTa
             <button
               style={S.toolActionCard}
               disabled={isExecutingTool}
-              onClick={() => handleExecuteDemoTool('launch_app', { app: 'vscode' }, 'VS Code Launch')}
+              onClick={() => handleExecuteDemoTool('play_music', { query: 'lofi hip hop radio', platform: 'youtube' }, 'YouTube Playback')}
             >
-              <span style={S.toolActionIcon}>💻</span>
+              <span style={S.toolActionIcon}>▶️</span>
               <div style={S.toolActionText}>
-                <strong>Launch VS Code</strong>
-                <span>Spawns `code` process</span>
+                <strong>Play on YouTube</strong>
+                <span>Searches & launches video</span>
               </div>
             </button>
 
             <button
               style={S.toolActionCard}
               disabled={isExecutingTool}
-              onClick={() => handleExecuteDemoTool('open_folder', { path: 'desktop' }, 'Open Desktop')}
+              onClick={() => handleExecuteDemoTool('check_system_status', {}, 'Diagnosing PC Status')}
             >
-              <span style={S.toolActionIcon}>📁</span>
+              <span style={S.toolActionIcon}>🖥️</span>
               <div style={S.toolActionText}>
-                <strong>Open Desktop Folder</strong>
-                <span>Spawns Windows Explorer</span>
+                <strong>Check PC CPU/RAM</strong>
+                <span>Live WMI system specs</span>
+              </div>
+            </button>
+
+            <button
+              style={S.toolActionCard}
+              disabled={isExecutingTool}
+              onClick={() => handleExecuteDemoTool('open_url', { url: 'https://youtube.com' }, 'Open Website')}
+            >
+              <span style={S.toolActionIcon}>🌐</span>
+              <div style={S.toolActionText}>
+                <strong>Open YouTube Home</strong>
+                <span>Direct browser navigation</span>
+              </div>
+            </button>
+
+            <button
+              style={S.toolActionCard}
+              disabled={isExecutingTool}
+              onClick={() => handleExecuteDemoTool('launch_app', { app: 'vscode' }, 'VS Code Launch')}
+            >
+              <span style={S.toolActionIcon}>💻</span>
+              <div style={S.toolActionText}>
+                <strong>Launch VS Code</strong>
+                <span>Spawns `code` process</span>
               </div>
             </button>
 
@@ -183,12 +207,12 @@ export const FirstRunShowcase: React.FC<FirstRunShowcaseProps> = ({ onNavigateTa
             <button
               style={S.toolActionCard}
               disabled={isExecutingTool}
-              onClick={() => handleExecuteDemoTool('play_music', { playlist: 'lofi beats' }, 'Spotify Lofi Beats')}
+              onClick={() => handleExecuteDemoTool('set_timer', { mode: 'timer' }, 'Open Windows Timer')}
             >
-              <span style={S.toolActionIcon}>🎧</span>
+              <span style={S.toolActionIcon}>⏱️</span>
               <div style={S.toolActionText}>
-                <strong>Play Spotify Beats</strong>
-                <span>Opens `spotify://` URI</span>
+                <strong>Open Timer/Alarm</strong>
+                <span>Spawns `ms-clock:timer`</span>
               </div>
             </button>
           </div>

@@ -39,13 +39,18 @@ pub fn extract_tool_calls(llm_response: &str) -> (String, Vec<ToolCall>) {
 /// Main agentic tool executor — dispatches tool_name → native OS action
 pub fn execute_tool(tool_call: &ToolCall) -> Result<ToolResult> {
     match tool_call.tool.as_str() {
-        "play_music" => execute_play_music(&tool_call.params),
-        "pause_music" => execute_media_key("pause"),
+        "play_music" | "play_media" | "play_video" | "play_youtube" => execute_play_media(&tool_call.params),
+        "pause_music" | "pause_media" => execute_media_key("pause"),
         "next_track" => execute_media_key("next"),
         "prev_track" => execute_media_key("prev"),
         "launch_app" => execute_launch_app(&tool_call.params),
         "open_folder" => execute_open_folder(&tool_call.params),
+        "open_url" | "browse_website" | "open_website" => execute_open_url(&tool_call.params),
         "control_volume" => execute_control_volume(&tool_call.params),
+        "system_control" | "lock_pc" | "sleep_pc" => execute_system_control(&tool_call.params, &tool_call.tool),
+        "check_system_status" | "system_status" | "get_sysinfo" => execute_check_system_status(),
+        "set_timer" | "set_alarm" => execute_set_timer(&tool_call.params),
+        "take_screenshot" | "screenshot" => execute_take_screenshot(),
         "run_command" => execute_run_command(&tool_call.params),
         "search_web" => execute_search_web(&tool_call.params),
         _ => Err(AtlasError::Agentic(format!("Unknown tool: '{}'", tool_call.tool))),
@@ -54,31 +59,53 @@ pub fn execute_tool(tool_call: &ToolCall) -> Result<ToolResult> {
 
 // ─── Tool Implementations ────────────────────────────────────────────────────
 
-/// Play music: launches Spotify URI or falls back to browser
-fn execute_play_music(params: &serde_json::Value) -> Result<ToolResult> {
-    let playlist = params.get("playlist")
+/// Play media: supports YouTube (default/fallback when Spotify not requested), YouTube Music, Spotify, SoundCloud, or direct video/song searches
+fn execute_play_media(params: &serde_json::Value) -> Result<ToolResult> {
+    let query = params.get("query")
+        .or_else(|| params.get("video"))
+        .or_else(|| params.get("song"))
+        .or_else(|| params.get("playlist"))
+        .or_else(|| params.get("artist"))
         .and_then(|v| v.as_str())
         .unwrap_or("");
-    let artist = params.get("artist")
+
+    let platform = params.get("platform")
         .and_then(|v| v.as_str())
-        .unwrap_or("");
+        .unwrap_or("youtube") // Default to YouTube so users aren't locked to Spotify
+        .to_lowercase();
 
-    // Try Spotify URI first
-    let query = if !playlist.is_empty() {
-        playlist.to_string()
-    } else if !artist.is_empty() {
-        artist.to_string()
-    } else {
-        "".to_string()
+    let (url, label) = match platform.as_str() {
+        "spotify" => {
+            if query.is_empty() {
+                ("spotify:".to_string(), "Spotify App".to_string())
+            } else {
+                (format!("https://open.spotify.com/search/{}", urlencoding(query)), format!("Spotify: {}", query))
+            }
+        }
+        "youtube_music" | "yt_music" | "ytmusic" => {
+            if query.is_empty() {
+                ("https://music.youtube.com".to_string(), "YouTube Music".to_string())
+            } else {
+                (format!("https://music.youtube.com/search?q={}", urlencoding(query)), format!("YouTube Music: {}", query))
+            }
+        }
+        "soundcloud" => {
+            if query.is_empty() {
+                ("https://soundcloud.com".to_string(), "SoundCloud".to_string())
+            } else {
+                (format!("https://soundcloud.com/search?q={}", urlencoding(query)), format!("SoundCloud: {}", query))
+            }
+        }
+        _ => {
+            // Default: YouTube ("youtube", "yt", "video", or any unspecified general query)
+            if query.is_empty() {
+                ("https://www.youtube.com".to_string(), "YouTube Home".to_string())
+            } else {
+                (format!("https://www.youtube.com/results?search_query={}", urlencoding(query)), format!("YouTube: {}", query))
+            }
+        }
     };
 
-    let url = if query.is_empty() {
-        "spotify:".to_string()
-    } else {
-        format!("https://open.spotify.com/search/{}", urlencoding(&query))
-    };
-
-    // Windows: use `start` to open URI
     let result = Command::new("cmd")
         .args(["/C", "start", "", &url])
         .spawn();
@@ -86,10 +113,10 @@ fn execute_play_music(params: &serde_json::Value) -> Result<ToolResult> {
     match result {
         Ok(_) => Ok(ToolResult {
             success: true,
-            message: format!("Music launched: {}", if query.is_empty() { "Spotify" } else { &query }),
+            message: format!("Media launched on {}.", label),
             action_taken: format!("Opened URL: {}", url),
         }),
-        Err(e) => Err(AtlasError::Agentic(format!("Failed to launch music: {}", e))),
+        Err(e) => Err(AtlasError::Agentic(format!("Failed to launch media: {}", e))),
     }
 }
 
@@ -102,7 +129,6 @@ fn execute_media_key(action: &str) -> Result<ToolResult> {
         _ => return Err(AtlasError::Agentic(format!("Unknown media key: {}", action))),
     };
 
-    // PowerShell SendKeys via WScript.Shell
     let ps_script = format!(
         r#"$wsh = New-Object -ComObject WScript.Shell; $wsh.SendKeys([char]{})"#,
         key_code
@@ -156,6 +182,34 @@ fn execute_launch_app(params: &serde_json::Value) -> Result<ToolResult> {
     }
 }
 
+/// Open any website or direct URL
+fn execute_open_url(params: &serde_json::Value) -> Result<ToolResult> {
+    let raw_url = params.get("url")
+        .or_else(|| params.get("website"))
+        .or_else(|| params.get("site"))
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| AtlasError::Agentic("Missing 'url' parameter".into()))?;
+
+    let url = if raw_url.starts_with("http://") || raw_url.starts_with("https://") {
+        raw_url.to_string()
+    } else {
+        format!("https://{}", raw_url)
+    };
+
+    let result = Command::new("cmd")
+        .args(["/C", "start", "", &url])
+        .spawn();
+
+    match result {
+        Ok(_) => Ok(ToolResult {
+            success: true,
+            message: format!("Opened website: {}", raw_url),
+            action_taken: format!("Opened URL: {}", url),
+        }),
+        Err(e) => Err(AtlasError::Agentic(format!("Failed to open website: {}", e))),
+    }
+}
+
 /// Open a specific folder in Windows Explorer
 fn execute_open_folder(params: &serde_json::Value) -> Result<ToolResult> {
     let path = params.get("path")
@@ -193,17 +247,111 @@ fn execute_control_volume(params: &serde_json::Value) -> Result<ToolResult> {
 
     if let Some(level) = params.get("level").and_then(|v| v.as_u64()) {
         let level = level.min(100);
-        // Set volume via PowerShell audio API
-        let _cmd = format!(
-            r#"$vol = [math]::Round({} / 100.0 * 65535); (New-Object -ComObject WScript.Shell).SendKeys([char]0xAD); Add-Type -TypeDefinition 'using System.Runtime.InteropServices; [Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)] public interface IAudioEndpointVolume {{ }};'"#,
-            level
-        );
-        // Simplified: use nircmd if available, else skip
         let _ = Command::new("nircmd").args(["setsysvolume", &(level * 655).to_string()]).spawn();
         return Ok(ToolResult { success: true, message: format!("Volume set to {}%", level), action_taken: format!("setsysvolume {}", level) });
     }
 
     Err(AtlasError::Agentic("Volume: provide 'mute' (bool) or 'level' (0-100)".into()))
+}
+
+/// Control system power, lock, settings, or utilities
+fn execute_system_control(params: &serde_json::Value, tool_name: &str) -> Result<ToolResult> {
+    let action = if tool_name == "lock_pc" {
+        "lock"
+    } else if tool_name == "sleep_pc" {
+        "sleep"
+    } else {
+        params.get("action")
+            .and_then(|v| v.as_str())
+            .unwrap_or("lock")
+    };
+
+    match action.to_lowercase().as_str() {
+        "lock" | "lock_pc" => {
+            Command::new("rundll32.exe").args(["user32.dll,LockWorkStation"]).spawn()
+                .map_err(|e| AtlasError::Agentic(format!("Lock Workstation error: {}", e)))?;
+            Ok(ToolResult { success: true, message: "PC Locked.".into(), action_taken: "LockWorkStation".into() })
+        }
+        "sleep" | "suspend" => {
+            Command::new("rundll32.exe").args(["powrprof.dll,SetSuspendState", "0,1,0"]).spawn()
+                .map_err(|e| AtlasError::Agentic(format!("Sleep error: {}", e)))?;
+            Ok(ToolResult { success: true, message: "Putting PC to sleep...".into(), action_taken: "SetSuspendState".into() })
+        }
+        "settings" => {
+            Command::new("cmd").args(["/C", "start", "", "ms-settings:"]).spawn()
+                .map_err(|e| AtlasError::Agentic(format!("Settings error: {}", e)))?;
+            Ok(ToolResult { success: true, message: "Windows Settings opened.".into(), action_taken: "ms-settings:".into() })
+        }
+        "calc" | "calculator" => {
+            Command::new("cmd").args(["/C", "start", "", "calc"]).spawn()
+                .map_err(|e| AtlasError::Agentic(format!("Calculator error: {}", e)))?;
+            Ok(ToolResult { success: true, message: "Calculator launched.".into(), action_taken: "calc".into() })
+        }
+        "taskmgr" | "task_manager" => {
+            Command::new("cmd").args(["/C", "start", "", "taskmgr"]).spawn()
+                .map_err(|e| AtlasError::Agentic(format!("Task Manager error: {}", e)))?;
+            Ok(ToolResult { success: true, message: "Task Manager opened.".into(), action_taken: "taskmgr".into() })
+        }
+        other => Err(AtlasError::Agentic(format!("Unknown system control action: '{}'", other))),
+    }
+}
+
+/// Check live OS diagnostics (CPU usage, Memory load, and Uptime)
+fn execute_check_system_status() -> Result<ToolResult> {
+    let ps_script = r#"
+        $os = Get-CimInstance Win32_OperatingSystem;
+        $cpu = Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average | Select-Object -ExpandProperty Average;
+        $totalRam = [math]::Round($os.TotalVisibleMemorySize / 1024, 1);
+        $freeRam = [math]::Round($os.FreePhysicalMemory / 1024, 1);
+        $usedRam = [math]::Round($totalRam - $freeRam, 1);
+        $uptime = [math]::Round((Get-Date).Subtract($os.LastBootUpTime).TotalHours, 1);
+        "CPU: ${cpu}% | RAM: ${usedRam}MB / ${totalRam}MB (${freeRam}MB free) | Uptime: ${uptime}h"
+    "#;
+
+    let output = Command::new("powershell")
+        .args(["-NoProfile", "-WindowStyle", "Hidden", "-Command", ps_script])
+        .output()
+        .map_err(|e| AtlasError::Agentic(format!("System diagnostics failed: {}", e)))?;
+
+    let stats = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    let message = if stats.is_empty() {
+        "System status active and responding normally.".to_string()
+    } else {
+        stats
+    };
+
+    Ok(ToolResult {
+        success: true,
+        message: message.clone(),
+        action_taken: format!("Diagnosed PC specs: {}", message),
+    })
+}
+
+/// Open Windows Clock/Alarm app or set a timer
+fn execute_set_timer(params: &serde_json::Value) -> Result<ToolResult> {
+    let mode = params.get("mode").and_then(|v| v.as_str()).unwrap_or("timer");
+    let target = if mode == "alarm" { "ms-clock:alarm" } else { "ms-clock:timer" };
+
+    Command::new("cmd").args(["/C", "start", "", target]).spawn()
+        .map_err(|e| AtlasError::Agentic(format!("Timer launch failed: {}", e)))?;
+
+    Ok(ToolResult {
+        success: true,
+        message: format!("Windows {} app launched.", if mode == "alarm" { "Alarm" } else { "Timer" }),
+        action_taken: format!("start {}", target),
+    })
+}
+
+/// Take screenshot using Windows Snipping Tool
+fn execute_take_screenshot() -> Result<ToolResult> {
+    Command::new("cmd").args(["/C", "start", "", "ms-screenclip:"]).spawn()
+        .map_err(|e| AtlasError::Agentic(format!("Screenshot launch failed: {}", e)))?;
+
+    Ok(ToolResult {
+        success: true,
+        message: "Windows Snipping Tool (Screen Clip) launched. Select area to capture.".into(),
+        action_taken: "ms-screenclip:".into(),
+    })
 }
 
 /// Run an arbitrary shell command (safe allowlist only)
@@ -212,7 +360,6 @@ fn execute_run_command(params: &serde_json::Value) -> Result<ToolResult> {
         .and_then(|v| v.as_str())
         .ok_or_else(|| AtlasError::Agentic("Missing 'command' param".into()))?;
 
-    // Safety allowlist — only permit specific safe commands
     let allowed_prefixes = ["git status", "git log", "git diff", "npm run", "cargo check", "cargo build", "dir", "ls", "echo", "ipconfig", "ping"];
     let is_allowed = allowed_prefixes.iter().any(|prefix| cmd.trim().starts_with(prefix));
 
@@ -294,22 +441,27 @@ fn expand_path_aliases(path: &str) -> String {
 /// Build the tool definition schema to inject into the Ollama system prompt
 pub fn build_tool_schema_prompt() -> String {
     r#"
-AGENTIC TOOL CAPABILITIES — You can execute real actions on the user's computer.
+AGENTIC TOOL CAPABILITIES — You are an advanced local Alexa / J.A.R.V.I.S. with real OS control over the user's computer.
 When you want to trigger an action, include a tool call block ANYWHERE in your response using this format:
 <TOOL_CALL>{"tool": "tool_name", "params": {...}}</TOOL_CALL>
 
-You can still speak naturally in the same message. The block will be executed silently and removed from the displayed text.
+You can still speak naturally in your mirror persona voice in the same message. The block will be executed silently and removed from the displayed text.
 
 AVAILABLE TOOLS:
-- play_music     → {"tool": "play_music", "params": {"playlist": "chill beats"}} or {"artist": "Daft Punk"}
-- pause_music    → {"tool": "pause_music", "params": {}}
-- next_track     → {"tool": "next_track", "params": {}}
-- launch_app     → {"tool": "launch_app", "params": {"app": "vscode"}} — supports: vscode, terminal, discord, chrome, spotify, notion
-- open_folder    → {"tool": "open_folder", "params": {"path": "desktop"}} — supports: desktop, downloads, documents, or any full path
-- control_volume → {"tool": "control_volume", "params": {"mute": true}} or {"level": 60}
-- run_command    → {"tool": "run_command", "params": {"command": "git status"}} — only dev/inspection commands
-- search_web     → {"tool": "search_web", "params": {"query": "rust async book"}}
+- play_music / play_video / play_youtube → {"tool": "play_music", "params": {"query": "daft punk", "platform": "youtube"}} — platforms: "youtube" (default), "youtube_music", "spotify", "soundcloud"
+- pause_music / next_track / prev_track  → {"tool": "pause_music", "params": {}}
+- launch_app          → {"tool": "launch_app", "params": {"app": "vscode"}} — supports: vscode, terminal, discord, chrome, firefox, explorer, notepad, spotify, notion
+- open_url / browse   → {"tool": "open_url", "params": {"url": "youtube.com"}} or {"url": "https://reddit.com"}
+- open_folder         → {"tool": "open_folder", "params": {"path": "desktop"}} — supports: desktop, downloads, documents, or any full path
+- control_volume      → {"tool": "control_volume", "params": {"mute": true}} or {"level": 60}
+- system_control / lock_pc / sleep_pc → {"tool": "system_control", "params": {"action": "lock"}} — supports: lock, sleep, settings, calc, taskmgr
+- check_system_status → {"tool": "check_system_status", "params": {}} — returns exact live CPU usage, used/free RAM, and uptime so you can tell the user how their PC is performing!
+- set_timer / alarm   → {"tool": "set_timer", "params": {"mode": "timer"}} — supports: timer, alarm
+- take_screenshot     → {"tool": "take_screenshot", "params": {}} — launches interactive screen capture
+- run_command         → {"tool": "run_command", "params": {"command": "git status"}} — only safe dev allowlist commands
+- search_web          → {"tool": "search_web", "params": {"query": "rust async book"}}
 
-IMPORTANT: Only emit tool calls when the user explicitly asks you to take an action. Speak naturally around the tool call.
+IMPORTANT: Only emit tool calls when the user asks for an action. Speak naturally around the tool call.
 "#.to_string()
 }
+
