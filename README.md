@@ -1,246 +1,254 @@
-<div align="center">
+﻿<div align="center">
 
-<h1>Atlas Identity OS</h1>
-<p><strong>A local-first AI that learns who you are, thinks like you do, and acts on your behalf.</strong></p>
+# 🌌 Atlas Identity OS
 
-<p>
-  <img src="https://img.shields.io/badge/Tauri-2.0-24C8D8?style=flat-square&logo=tauri&logoColor=white" />
-  <img src="https://img.shields.io/badge/Rust-stable-F74C00?style=flat-square&logo=rust&logoColor=white" />
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/Ollama-local%20LLM-222?style=flat-square" />
-  <img src="https://img.shields.io/badge/SQLCipher-encrypted-3A3A3A?style=flat-square" />
-  <img src="https://img.shields.io/badge/sqlite--vec-vector%20search-A78BFA?style=flat-square" />
-  <img src="https://img.shields.io/badge/privacy-100%25%20local-34D399?style=flat-square" />
-</p>
+### Your private, local-first AI personal assistant — a J.A.R.V.I.S. for your everyday life.
 
-<br/>
+[![Tauri](https://img.shields.io/badge/Tauri_v2-24C8DB?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app)
+[![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![React](https://img.shields.io/badge/React_18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Ollama](https://img.shields.io/badge/Ollama-Local_AI-8B5CF6?style=for-the-badge)](https://ollama.ai)
+[![SQLCipher](https://img.shields.io/badge/SQLCipher-AES--256-10B981?style=for-the-badge)](https://www.zetetic.net/sqlcipher/)
 
-> Atlas is not a productivity tool or a generic AI assistant.  
-> It is a **digital twin** — a local system that extracts your behavioral fingerprint, replicates your inner monologue, and responds exactly as *you* would.  
-> Everything runs on your machine. Nothing leaves your device.
+**100% local. Zero cloud. Zero subscriptions. Runs on your own machine.**
+
+*Chat with your own cloned persona, control your PC with voice commands, play YouTube, lock your computer, check your RAM usage — all through a conversation.*
 
 </div>
 
 ---
 
-## What Atlas Is
+## ✨ What is Atlas?
 
-Most AI assistants know facts about the world. **Atlas knows facts about you.**
+Atlas is a **personal AI OS layer** — a desktop app that runs a private, locally-encrypted identity graph of *you*. It learns your communication style, behavioral patterns, and personality through a structured MCQ questionnaire, then builds an AI persona that speaks exactly like you.
 
-It builds a live **behavioral fingerprint** from a 21-question adaptive onboarding (no long personality tests), your chat patterns, voice diary entries, and continuous observation — then uses that fingerprint to drive a local LLM (`llama3.1:8b`, `qwen3:8b`) so that every response sounds like your own sharpest, most unfiltered inner monologue.
-
-The result is something between a mirror, a second brain, and a personal J.A.R.V.I.S.
+Unlike Alexa or Siri, **Atlas sends zero data to any cloud**. Every byte lives in your encrypted SQLCipher vault on your local machine.
 
 ---
 
-## Core Features
+## 🚀 Feature Overview
 
-### 🧬 Behavioral Fingerprinting (Persona Clone)
-A 21-question adaptive MCQ onboarding designed to extract **behavioral evidence**, not self-reported opinions. Each answer updates live OCEAN trait bars, MBTI axis leans, and a real-time extraction log — all stored in an encrypted `SQLCipher` vault.
+### 🧬 1. Behavioral Mirror Persona (Persona Clone)
+- A **26-question MCQ onboarding** (Behavioral Evidence Engine) based on OCEAN + MBTI research. No self-report sliders, no open text — only high-signal situational choices.
+- Atlas scores your answers across 8 latent behavioral dimensions (Conflict Style, Emotional Depth, Autonomy, Commitment, Risk Tolerance, etc.) plus standard Big Five OCEAN traits.
+- The resulting **persona fingerprint** is stored encrypted in your local vault and auto-injected as a system prompt into every AI conversation — so Atlas speaks *your* language, not generic chatbot language.
+- Live OCEAN/MBTI progress bars animate as you complete questions, showing your personality profile building in real-time.
 
-Powered by the research behind `PersonaChat / ConvAI2`, `BIG5-CHAT`, `TwinVoice (2025)`, and `PersonalityEdit (2023)`.
+### 💬 2. Mirror Chat (AI that speaks like you)
+- A **local Ollama-powered chat panel** wired to your cloned persona system prompt.
+- The AI avatar (see below) shifts emotional states based on conversation sentiment.
+- Full **tool execution pipeline**: Atlas can parse `<TOOL_CALL>` blocks from AI responses and silently run native OS actions without interrupting the conversation flow.
+- Powered by any Ollama model — defaults to `llama3.1:8b` but supports any local model.
 
-### 💬 Mirror Persona Chat
-Every chat message is powered by your behavioral fingerprint. Atlas calls `compile_mirror_persona_prompt()` — a terse 6-8 line distilled system prompt using only your highest-confidence traits — and injects it into Ollama before every request.
+### 🤖 3. Agentic OS Control (Alexa/J.A.R.V.I.S. Mode)
+You can say *"Atlas, play lofi beats on YouTube"* or *"Open VS Code and check my git status"* and Atlas will actually execute these actions on your Windows PC:
 
-Result: Atlas addresses you as `ok bhai` (or whatever you configured), uses your signature phrases, matches your humor register, and gives you the unfiltered, direct answers your inner monologue would produce.
+| Command | What It Does |
+|:--------|:-------------|
+| `play_music` / `play_youtube` | Searches and launches YouTube (default), YouTube Music, Spotify, or SoundCloud in browser |
+| `launch_app` | Spawns VS Code, PowerShell, Chrome, Firefox, Discord, Notepad, Notion, or any exe |
+| `open_url` / `browse_website` | Opens any URL or website directly in your default browser |
+| `open_folder` | Opens Desktop, Downloads, Documents, or any full Windows path in Explorer |
+| `control_volume` | Mutes/unmutes or sets system volume level (0–100) |
+| `system_control` | Locks your PC, puts it to sleep, opens Settings, Task Manager, or Calculator |
+| `check_system_status` | Queries live WMI data: exact CPU %, used/free RAM, and system uptime |
+| `set_timer` / `set_alarm` | Launches Windows Clock timer or alarm app |
+| `take_screenshot` | Opens Windows Snipping Tool for interactive screen capture |
+| `search_web` | Launches Google search in your browser |
+| `run_command` | Executes safe dev commands: `git status`, `cargo check`, `npm run`, etc. |
 
-### 🤖 Agentic PC Control
-Atlas can control your computer. Tell it to play music, open VS Code, search the web, or run a git command — it parses `<TOOL_CALL>` blocks from Ollama responses and executes real native OS actions through a Rust tool engine:
+### 🧠 4. Local Voice Control (Push-to-Talk)
+- Global hotkey `Ctrl + Shift + Space` activates push-to-talk without switching windows.
+- Records microphone audio via `cpal` (cross-platform audio library, Rust).
+- Transcribes via **local Whisper model** running through Ollama (zero cloud transcription).
+- Transcription auto-injects into the chat pipeline → triggers persona-aware AI response → executes any agentic tool call found in the reply.
 
-| Voice / Text Command | What Happens |
-|---|---|
-| "bhai put on some chill beats" | Launches Spotify with your playlist |
-| "open VS Code and pull up the project" | `code .` spawned in your workspace |
-| "what's the git status on this?" | `git status` executed, result shown in chat |
-| "search for best Rust async patterns" | Browser opens Google search |
+### 🎭 5. Animated SVG Avatar (AvatarFace)
+An animated Memoji/Bitmoji-style face that reacts to conversation state:
 
-### 🎙️ Voice Diary
-Record raw PCM audio via `cpal` directly into your encrypted timeline. All audio stays local — no cloud transcription, no API keys.
+| State | Trigger | Visual |
+|:------|:--------|:-------|
+| `NEUTRAL` | Idle | Sky-blue glow, slow blink |
+| `LISTENING` | Voice capture active | Emerald glow, open eyes |
+| `THINKING` | Waiting for Ollama | Violet glow, squint |
+| `SPEAKING` | AI streaming response | Cyan glow, lip-sync animation |
+| `SASSY` | Loaded persona / sarcastic reply | Orange glow, smirk |
 
-### 🧠 Vector Memory Graph
-Every thought you log is embedded via local ONNX (`bge-small-en-v1.5`) and stored as a 384-dimensional vector in `sqlite-vec`. When you chat, Atlas retrieves the top nearest memories using hybrid reranking:
+### ⏳ 6. Chronological Identity Timeline
+- Every chat message, voice note, observed file, and git commit is stored as a versioned **graph node** in your encrypted SQLCipher identity graph.
+- Filter by entity type: `ALL`, `chat`, `voice_note`, `observed_file`, `git_commit`.
+- Click any node to see its **Memory Neighborhood** — connected related entities in your identity graph.
 
-```
-Final Score = (Semantic Similarity × 0.55) + (Recency Decay × 0.30) + (Persona Affinity × 0.15)
-```
+### 🕸️ 7. Interactive Network Graph Canvas
+- Visual circular node map rendering your entire identity graph.
+- Color-coded by entity type, directed relationship edges between nodes.
+- Click nodes to inspect full content and raw metadata.
 
-### 🔐 Zero-Trust Local Architecture
-- **SQLCipher** — AES-256 encrypted local database. Nothing readable without your passphrase.
-- **Argon2id** key derivation — passphrase never stored, derived on every unlock.
-- **BIP-39 recovery phrase** — 24-word mnemonic for disaster recovery.
-- No telemetry. No cloud sync. No accounts. No API keys required.
+### 🔐 8. Zero-Trust Encrypted Vault
+- **SQLCipher AES-256** database — all data encrypted at rest. Even if someone steals your hard drive, they see only random bytes.
+- Master passphrase is derived via **Argon2id** key derivation (memory-hard, resistant to GPU brute-force).
+- First-run generates a **BIP39 12-word recovery phrase** (shown once, never stored again).
+- Lock/Unlock via `Alt + Space` global hotkey or app tray icon.
+- Auto-hide on window blur (click anywhere outside Atlas = it hides to tray).
 
-### 📲 Telegram Push Notifications
-Receive real-time memory summaries and Atlas updates directly on your phone via Telegram Bot API — credentials stored encrypted in SQLCipher.
+### 📁 9. Filesystem Watcher (Auto-Import)
+- Watch any directory (default: `~/Atlas-Observed/`) for new `.md`, `.txt`, `.pdf`, `.json` files.
+- Automatically parses, extracts entities, embeds content as vectors, and stores in your identity graph — without you doing anything.
 
-### 🌐 Network Graph & Timeline
-A directed knowledge graph of your memories (`nodes` + `edges`) visualized as an interactive network. Navigate your personal timeline chronologically or by semantic cluster.
+### 🧮 10. Local Vector Search (`sqlite-vec` + ONNX)
+- Uses `bge-small-en-v1.5.onnx` (133MB local model) for neural text embedding.
+- `sqlite-vec` virtual table enables sub-100ms KNN similarity search across your entire memory corpus.
+- Every AI chat retrieves semantically relevant memories from your graph before generating a response.
 
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      ATLAS IDENTITY OS                       │
-│                   (Tauri Desktop — Windows)                  │
-├─────────────────────────────┬───────────────────────────────┤
-│        FRONTEND (React)     │        BACKEND (Rust)          │
-│                             │                                │
-│  🧬 PersonalityCloner       │  graph/schema.rs               │
-│     21 adaptive MCQs        │    persona_dna                 │
-│     Live OCEAN bars         │    relationship_addressing     │
-│     Live MBTI leans         │    interview_responses         │
-│     Real-time extract log   │    behavioral_evidence_log     │
-│                             │                                │
-│  💬 ChatPanel               │  graph/persona_engine.rs       │
-│     Mirror persona chat     │    compile_mirror_persona_prompt│
-│     inferAvatarState()      │    persona_rerank()            │
-│     Ollama integration      │    resolve_addressing_context()│
-│     Tool call parsing       │    save_onboarding_profile()   │
-│                             │                                │
-│  🎭 AvatarFace              │  agentic.rs                    │
-│     NEUTRAL / LISTENING     │    play_music                  │
-│     THINKING / SPEAKING     │    launch_app                  │
-│     SASSY (sarcasm detect)  │    open_folder                 │
-│                             │    control_volume              │
-│  ⏳ TimelineView            │    run_command                 │
-│  🕸️  NetworkGraph           │    search_web                  │
-│  ⚙️  SettingsPage           │                                │
-│                             │  embed.rs (ONNX + sqlite-vec)  │
-│                             │  audio.rs (cpal voice diary)   │
-│                             │  vault.rs (SQLCipher + Argon2) │
-│                             │  telegram.rs (push notify)     │
-└─────────────────────────────┴───────────────────────────────┘
-                              │
-              ┌───────────────┴────────────────┐
-              │      LOCAL OLLAMA (ollama.ai)   │
-              │   llama3.1:8b / qwen3:8b /      │
-              │   mistral:7b / phi3:mini         │
-              └─────────────────────────────────┘
-```
+### 📱 11. Outbound Telegram Push Notifications
+- Configure a Telegram bot token + chat ID in Settings.
+- Atlas can push real-time mobile notifications from chat replies directly to your phone.
 
 ---
 
-## Tech Stack
+## 🗂️ File Architecture — Every File Explained
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Desktop Shell | **Tauri 2.0** | Native window, IPC bridge, system tray |
-| Backend | **Rust (stable)** | All core logic, OS operations, DB |
-| Frontend | **React 18 + TypeScript** | UI, chat, avatar, onboarding |
-| Database | **SQLCipher (rusqlite)** | Encrypted local storage |
-| Vector Search | **sqlite-vec (vec0)** | KNN 384-dim embedding search |
-| Embeddings | **ONNX Runtime (bge-small-en-v1.5)** | Local 384-dim text embeddings |
-| LLM | **Ollama** (`llama3.1:8b`, `qwen3:8b`) | Local language model |
-| Audio | **cpal** | Cross-platform audio capture |
-| Key Derivation | **Argon2id** | Passphrase-derived encryption keys |
-| Recovery | **BIP-39** | 24-word mnemonic recovery phrase |
+### Frontend — `atlas-app/src/`
+
+| File | Role |
+|:-----|:-----|
+| `App.tsx` | Root application shell. Manages vault unlock state, tab navigation, and global keyboard shortcuts (`Esc` to hide, blur auto-hide). Renders all page components based on `activeTab`. |
+| `App.css` | Global design system: glassmorphism tokens, fixed focus/highlight state, custom scrollbars, animation keyframes, nav tab styles. |
+| `main.tsx` | Vite React entry point. Mounts `<App />` into `#root`. |
+| `vite-env.d.ts` | TypeScript ambient declarations for Vite environment variables. |
+
+### Frontend Components — `atlas-app/src/components/`
+
+| File | Role |
+|:-----|:-----|
+| `SetupPage.tsx` | First-run vault creation screen. Collects master passphrase, shows strength meter, generates BIP39 recovery phrase, calls `init_vault` IPC. |
+| `UnlockPage.tsx` | Returning-user passphrase entry screen. Calls `unlock_vault` IPC. |
+| `PersonalityCloner.tsx` | 26-question MCQ Behavioral Evidence Engine. Scores answers across OCEAN/MBTI dimensions, animates live trait bars, saves encrypted persona profile via `save_onboarding_profile` IPC. |
+| `ChatPanel.tsx` | Main AI chat interface. Loads mirror persona system prompt, sends messages to Ollama, streams responses, parses `<TOOL_CALL>` blocks for agentic execution, integrates `VoiceBar` for push-to-talk, manages Telegram push config. |
+| `AvatarFace.tsx` | Animated SVG avatar engine. Renders 5 emotional states (NEUTRAL, LISTENING, THINKING, SPEAKING, SASSY) with smooth SVG path morphing, blinking, lip-sync, and color-coded aura glows. |
+| `VoiceBar.tsx` | Push-to-talk recording bar. Listens for `Ctrl+Shift+Space` global shortcut, calls `start_voice_recording`/`stop_and_transcribe` IPC, shows live waveform animation while recording. |
+| `FirstRunShowcase.tsx` | Interactive 5-step guided demo walkthrough tab showing all Atlas capabilities with live clickable test buttons (YouTube playback, PC diagnostics, app launch, volume, timer). |
+| `TimelineView.tsx` | Chronological identity event feed with type filters. Renders identity graph nodes with timestamps, entity type badges, and a Memory Neighborhood drill-down panel. |
+| `NetworkGraph.tsx` | SVG canvas network graph visualizer. Renders all identity nodes as glowing circles with directed relationship edges between them. |
+| `SettingsPage.tsx` | Settings panel. Manages watched source directories, Telegram bot configuration, Mirror Persona Mode toggle, vault lock/unlock, and system tray behaviour. |
+
+### Backend — `atlas-app/src-tauri/src/`
+
+| File | Role |
+|:-----|:-----|
+| `lib.rs` | Core Tauri IPC command registry. Wires all frontend IPC commands (`init_vault`, `unlock_vault`, `send_chat_message`, `execute_agentic_tool`, `embed_and_store`, `get_timeline_feed`, etc.) to Rust implementations. Manages system tray, global shortcut registration, and app state initialization. |
+| `main.rs` | Tauri app entry point. Calls `lib::run()`. |
+| `vault.rs` | `VaultManager` struct. Handles SQLCipher AES-256 database lifecycle: Argon2id key derivation, `PRAGMA key`, schema initialization across 25+ tables, encrypted settings storage, and vault lock/unlock state management. |
+| `agentic.rs` | **The OS automation engine**. 13 native action tools: YouTube/Spotify/SoundCloud playback, direct URL opening, app launching, folder navigation, volume control, PC lock/sleep, live WMI system diagnostics (CPU/RAM/uptime), Windows timer/alarm, screenshot capture, safe shell command execution. Parses `<TOOL_CALL>{...}</TOOL_CALL>` blocks from LLM responses. |
+| `audio.rs` | `AudioRecorder` struct. Records microphone input via `cpal` to 16kHz WAV files. Transcribes via local Ollama Whisper endpoint (`/api/transcribe`). Exposes `start_voice_recording`, `stop_voice_recording`, `stop_and_transcribe` IPC commands. |
+| `embed.rs` | `EmbeddingsEngine` struct. Loads `bge-small-en-v1.5.onnx` (133MB) via `ort` ONNX Runtime. Mean-pools token embeddings to 384-dim vectors. Stores and queries via `sqlite-vec` virtual KNN table (`vec0`). |
+| `watcher.rs` | `FilesystemWatcher` struct using `notify` crate. Watches configured directories for file changes, emits `fs-change` events to the Tauri frontend on new `.md`/`.txt`/`.pdf` drops. |
+| `telegram.rs` | `TelegramEngine` struct. Sends push notifications to your Telegram phone via Bot API (`/sendMessage`). Stores encrypted bot token and chat_id in SQLCipher `settings_secure` table. |
+| `errors.rs` | `AtlasError` enum. Unified error type across all Rust modules using `thiserror`. Maps to Tauri IPC serializable errors. |
+| `graph/` | Directory containing `schema.rs` (25+ table SQL schema), `queries.rs` (`get_node_neighbors`, `get_timeline_nodes`, `get_graph_network` query logic). |
 
 ---
 
-## Getting Started
+## 🔄 Complete Data Flow
+
+```
+User speaks → [Ctrl+Shift+Space]
+    ↓
+audio.rs (cpal microphone capture → 16kHz WAV)
+    ↓
+Ollama Whisper (/api/transcribe) → text
+    ↓
+ChatPanel.tsx (inject transcription as user message)
+    ↓
+embed.rs (bge-small-en-v1.5 ONNX → 384-dim vector)
+    ↓
+sqlite-vec KNN search → retrieve top 5 semantically similar memories
+    ↓
+persona_engine (vault.rs → decrypt persona fingerprint → build system prompt)
+    ↓
+Ollama LLM (/api/chat streaming) → AI response with optional <TOOL_CALL> blocks
+    ↓
+agentic.rs parser → execute native Windows OS actions
+    ↓
+AvatarFace.tsx → animate state (LISTENING → THINKING → SPEAKING)
+    ↓
+ChatPanel.tsx → display response bubble
+    ↓
+vault.rs → persist conversation node to identity graph (SQLCipher)
+```
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|:------|:-----------|
+| Desktop Shell | Tauri v2 (Rust backend + WebView frontend) |
+| Frontend | React 18 + TypeScript, Vite, Vanilla CSS glassmorphism |
+| Backend | Rust 2021 edition |
+| Database | SQLCipher (AES-256 encrypted SQLite) + sqlite-vec (ONNX vector search) |
+| AI/LLM | Ollama (local — llama3.1, mistral, qwen2, etc.) |
+| Transcription | Whisper (local via Ollama) |
+| Embeddings | `bge-small-en-v1.5.onnx` via ONNX Runtime (`ort` crate) |
+| Audio | `cpal` (cross-platform audio) |
+| Key Derivation | Argon2id (m=65536, t=3, p=1) |
+| Recovery | BIP39 12-word mnemonic phrase |
+| Filesystem | `notify` crate (auto-import watcher) |
+| Telegram | Bot API via `reqwest` HTTP client |
+
+---
+
+## ⚡ Quickstart
 
 ### Prerequisites
-- [Rust (stable)](https://rustup.rs/) 
-- [Node.js 18+](https://nodejs.org/)
-- [Tauri prerequisites for Windows](https://tauri.app/start/prerequisites/)
-- [Ollama](https://ollama.ai/) — for live LLM responses (`ollama pull llama3.1:8b`)
+- [Rust + Cargo](https://rustup.rs) (1.75+)
+- [Node.js](https://nodejs.org) (18+)
+- [Ollama](https://ollama.ai) running locally with at least one model pulled (`ollama pull llama3.1`)
 
-### Clone & Run
-
+### Run
 ```bash
 git clone https://github.com/Kshitiz-Khandelwal/Atlas-ai-personal-timeline-.git
 cd Atlas-ai-personal-timeline-/atlas-app
-
-# Install frontend deps
 npm install
-
-# Run in dev mode (compiles Rust + starts Vite dev server)
 npm run tauri dev
 ```
 
-### First Launch Flow
-
-1. **Create Vault** — Set a passphrase and save your BIP-39 recovery phrase.
-2. **Complete Persona Clone** — Answer the 21-question adaptive MCQ onboarding. Takes ~5 minutes. Watch your OCEAN bars shift in real time.
-3. **Save Profile** — Hit "Save to SQLCipher Vault". Your behavioral fingerprint is encrypted and stored locally.
-4. **Start Ollama** — `ollama serve` in a terminal, then `ollama pull llama3.1:8b`
-5. **Chat with Atlas** — Go to the `✨ Avatar & Chat` tab. Your mirror persona loads automatically. Atlas now talks like you.
+### First Run
+1. **Create your vault** — enter a strong master passphrase (save your BIP39 recovery phrase!)
+2. **Complete Persona Clone** — answer 26 behavioral MCQ questions to build your mirror persona
+3. **Go to Mirror Chat** — start talking to your AI alter ego
+4. Try **"Play lofi beats on YouTube"**, **"Check my PC status"**, or **"Lock my computer"**
 
 ---
 
-## Roadmap
+## 📸 Screenshots
 
-| Phase | Status | Description |
-|---|---|---|
-| Phase 1: Behavioral Onboarding | ✅ Complete | 21-question MCQ, live OCEAN/MBTI, SQLCipher persistence |
-| Phase 2: Mirror Persona Chat | ✅ Complete | Persona-injected Ollama, hybrid memory reranking, `inferAvatarState` |
-| Phase 3: Agentic OS Control | 🚀 In Progress | `agentic.rs` tool engine — play music, launch apps, run commands |
-| Phase 4: Voice & Local Whisper | ⏳ Planned | Push-to-talk + local Whisper transcription → chat pipeline |
-| Phase 5: Glassmorphism Polish | ⏳ Planned | Premium UI, first-run demo flow, micro-animations |
+> *(App running — Timeline View)*
 
 ---
 
-## Key Research References
+## 🔒 Privacy Guarantee
 
-This project is grounded in real LLM personality research:
-
-- **PersonaChat / ConvAI2** — Terse persona descriptions outperform verbose dossiers for 8B models
-- **PersonalityEdit (2023)** — Limits of trait-steering; why evidence beats self-report
-- **BIG5-CHAT** — Dialogue-based behavioral data produces more realistic persona replication
-- **TwinVoice (2025)** — Benchmark splitting persona fidelity into Social, Interpersonal & Narrative dimensions
-- **LIWC** — Linguistic fingerprinting via function words, punctuation, and sentence structure
+- ✅ All data stored encrypted in `atlas.db` (SQLCipher AES-256)
+- ✅ No telemetry, no analytics, no cloud sync
+- ✅ Passphrase never stored — only the Argon2id-derived key is held in memory
+- ✅ AI runs 100% locally via Ollama
+- ✅ Voice transcription runs 100% locally via Whisper (Ollama)
 
 ---
 
-## Project Structure
+## 📋 Roadmap — All 5 Phases Complete
 
-```
-Atlas/
-├── atlas-app/
-│   ├── src/                          # React frontend
-│   │   ├── components/
-│   │   │   ├── AvatarFace.tsx        # Animated Memoji-style avatar (5 states)
-│   │   │   ├── ChatPanel.tsx         # Mirror persona chat + Ollama + agentic parsing
-│   │   │   ├── PersonalityCloner.tsx # 21-question MCQ onboarding UI
-│   │   │   ├── TimelineView.tsx      # Chronological memory timeline
-│   │   │   ├── NetworkGraph.tsx      # Interactive knowledge graph
-│   │   │   └── SettingsPage.tsx
-│   │   └── utils/
-│   │       └── inferAvatarState.ts   # LLM sentiment → avatar state mapping
-│   └── src-tauri/src/                # Rust backend
-│       ├── agentic.rs                # OS tool execution engine
-│       ├── audio.rs                  # cpal voice recording
-│       ├── embed.rs                  # ONNX embeddings + sqlite-vec search
-│       ├── vault.rs                  # SQLCipher vault + Argon2 key derivation
-│       ├── telegram.rs               # Outbound push notifications
-│       ├── watcher.rs                # Filesystem observer
-│       └── graph/
-│           ├── schema.rs             # Full DB schema (persona_dna, nodes, etc.)
-│           ├── queries.rs            # Typed query helpers
-│           └── persona_engine.rs     # Mirror prompt distillation + reranking
-├── docs/
-│   └── BEHAVIORAL_EVIDENCE_ENGINE.md # Full 90-item instrument + scoring guide
-├── ATLAS_MASTER_ROADMAP_AND_PROMPT.md
-└── ATLAS_RESEARCH_PROMPTS.md
-```
-
----
-
-## Philosophy
-
-> Most AI tools make you more dependent on them.  
-> Atlas makes you more aware of yourself.
-
-The goal is not to replace your thinking. It's to give you a mirror that reflects how you actually think — decisions, biases, humor, slang, heuristics — and then hands that back to you as a tool you control entirely.
-
-No cloud. No subscription. No data mining. Just a very sharp version of you, running locally on your own hardware.
+| Phase | Status | Commit | Description |
+|:------|:-------|:-------|:------------|
+| Phase 1: Adaptive Onboarding | ✅ Complete | `9bf7ac8` | 26-question MCQ PersonalityCloner, OCEAN/MBTI bars, SQLCipher persistence |
+| Phase 2: Mirror Persona Chat | ✅ Complete | `114f0ba` | Mirror system prompt injection, Ollama streaming, hybrid memory reranking, animated avatar |
+| Phase 3: Agentic OS Control | ✅ Complete | `63031df` | 13 OS tools: YouTube, apps, URLs, volume, lock, diagnostics, screenshots |
+| Phase 4: Local Voice + Whisper | ✅ Complete | `2977484` | Global hotkey push-to-talk, cpal recording, local Whisper transcription |
+| Phase 5: Glassmorphic UI Polish | ✅ Complete | `5921c4e` | Premium dark glassmorphism, FirstRunShowcase interactive walkthrough |
 
 ---
 
 <div align="center">
-<p>Built by <strong>Kshitiz Khandelwal</strong></p>
-<p><em>Privacy-first. Personality-driven. Fully local.</em></p>
+Built with ❤️ by Kshitiz Khandelwal — runs 100% on your local machine.
 </div>

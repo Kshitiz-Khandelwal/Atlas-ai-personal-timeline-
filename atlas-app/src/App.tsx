@@ -141,7 +141,7 @@ export const App: React.FC = () => {
   ];
 
   return (
-    <div style={styles.appContainer}>
+    <div className="atlas-app-root" style={styles.appContainer}>
       <header style={styles.header}>
         <div style={styles.logoContainer}>
           <div style={styles.avatarMini} />
@@ -150,22 +150,19 @@ export const App: React.FC = () => {
         </div>
         
         <div style={styles.navBar}>
-          <div style={styles.navTabsGroup}>
+          <div className="nav-tabs-group">
             {navItems.map((item) => (
               <button
                 key={item.id}
+                className={`nav-btn${activeTab === item.id ? ' active' : ''}`}
                 onClick={() => setActiveTab(item.id)}
-                style={{
-                  ...styles.navBtn,
-                  ...(activeTab === item.id ? styles.navBtnActive : {}),
-                }}
               >
                 {item.label}
               </button>
             ))}
           </div>
           <button
-            style={styles.lockButton}
+            className="lock-btn"
             onClick={async () => {
               await invoke('lock_vault');
               setIsUnlocked(false);
@@ -176,7 +173,7 @@ export const App: React.FC = () => {
         </div>
       </header>
 
-      <main style={styles.mainContent}>
+      <main className="atlas-main-content" style={styles.mainContent}>
         {activeTab === 'SHOWCASE' ? (
           <FirstRunShowcase onNavigateTab={(tab) => setActiveTab(tab)} />
         ) : activeTab === 'CLONE' ? (
@@ -306,7 +303,6 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100vh',
     width: '100vw',
     backgroundColor: 'var(--color-bg-base)',
-    overflowY: 'auto',
   },
   header: {
     height: 64,
@@ -393,9 +389,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
   mainContent: {
     flex: 1,
-    padding: 'var(--spacing-xl)',
-    display: 'flex',
-    justifyContent: 'center',
   },
   gridContainer: {
     display: 'grid',
